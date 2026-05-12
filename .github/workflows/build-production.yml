@@ -39,11 +39,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/build-output
+          cp -r dist /tmp/build-output
           git branch -D production || true
           git checkout --orphan production
           git reset --hard
           git clean -fdx
-          cp -r dist/. .
+          cp -r /tmp/build-output/dist/. .
+          rm -rf /tmp/build-output
           git add .
           git commit -m "Production build from ${{ github.sha }}" || true
           git push --force origin production
