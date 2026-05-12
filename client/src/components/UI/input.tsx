@@ -1,4 +1,4 @@
-import { useDialogComposition } from "@/components/ui/dialog";
+import { useDialogComposition } from "@/components/UI/dialog";
 import { useComposition } from "@/hooks/useComposition";
 import { cn } from "@/lib/utils";
 import * as React from "react";
@@ -68,3 +68,4 @@ function Input({
 }
 
 export { Input };
+

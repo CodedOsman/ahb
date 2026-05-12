@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/UI/sonner';
+import { TooltipProvider } from '@/components/UI/tooltip';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CartProvider } from './contexts/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -80,3 +80,4 @@ function App() {
 }
 
 export default App;
+

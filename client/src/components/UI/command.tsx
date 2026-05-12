@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/UI/dialog";
 
 function Command({
   className,
@@ -182,3 +182,4 @@ export {
   CommandShortcut,
   CommandSeparator,
 };
+

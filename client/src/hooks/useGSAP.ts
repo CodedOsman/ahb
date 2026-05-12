@@ -37,3 +37,4 @@ export const useGSAP = (
 };
 
 export { ScrollTrigger };
+

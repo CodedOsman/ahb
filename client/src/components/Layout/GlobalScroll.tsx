@@ -20,3 +20,4 @@ export const GlobalScroll: React.FC<GlobalScrollProps> = ({ children }) => {
 };
 
 export default GlobalScroll;
+

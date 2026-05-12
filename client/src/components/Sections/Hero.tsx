@@ -193,3 +193,4 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
 };
 
 export default Hero;
+

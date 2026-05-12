@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/UI/button";
+import { Card, CardContent } from "@/components/UI/card";
 import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -47,3 +47,4 @@ export default function NotFound() {
     </div>
   );
 }
+
