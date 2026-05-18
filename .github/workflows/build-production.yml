@@ -44,6 +44,8 @@ jobs:
           cp package.json /tmp/build-output/dist/
           cp pnpm-lock.yaml /tmp/build-output/dist/
           cp seed_db.ts /tmp/build-output/dist/
+          cp -r server /tmp/build-output/dist/
+          cp -r shared /tmp/build-output/dist/
           git branch -D production || true
           git checkout --orphan production
           git reset --hard
