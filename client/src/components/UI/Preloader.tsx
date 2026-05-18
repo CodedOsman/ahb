@@ -41,7 +41,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
       const isLeft = i < Math.ceil(strandCount / 2);
       const direction = isLeft ? -40 : 40;
       const delay = i * 0.08;
-      
+
       timeline.to(
         `.hair-strand-${i}`,
         {
@@ -92,7 +92,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
   return (
     <>
       {/* Main Preloader Container */}
-      <div className="preloader-container fixed inset-0 z-50 bg-charcoal flex items-center justify-center overflow-hidden">
+      <div className="preloader-container fixed inset-0 z-50 bg-alabaster flex items-center justify-center overflow-hidden">
         {/* Hair Bundle SVG Animation */}
         <svg
           width="300"
@@ -140,23 +140,23 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         {/* Logo Text - Appears during split */}
         <div className="logo-text absolute opacity-0">
           <h1
-            className="text-6xl font-black text-beige text-center"
+            className="text-6xl font-black text-soft-slate text-center"
             style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '-0.03em' }}
           >
             ASANTEY
           </h1>
           <p
-            className="text-sm text-beige-light text-center mt-3 tracking-widest"
+            className="text-sm text-warm-silver text-center mt-3 tracking-widest"
             style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}
           >
-            LUXURY SALON
+            HAIR & BEAUTY
           </p>
         </div>
       </div>
 
       {/* Fade overlay for smooth transition */}
       <div
-        className="preloader-overlay fixed inset-0 z-40 bg-charcoal opacity-100"
+        className="preloader-overlay fixed inset-0 z-40 bg-alabaster opacity-100"
         style={{ pointerEvents: 'none' }}
       />
     </>

@@ -95,7 +95,7 @@ export const Cursor: React.FC = () => {
       {/* Lead Dot */}
       <div
         ref={cursorRef}
-        className="pointer-events-none fixed w-3 h-3 rounded-full bg-beige z-[9999]"
+        className="pointer-events-none fixed w-3 h-3 rounded-full bg-champagne z-[9999]"
         style={{
           transform: 'translate(-50%, -50%)',
           boxShadow: '0 0 10px rgba(212, 185, 150, 0.6)',
@@ -105,7 +105,7 @@ export const Cursor: React.FC = () => {
       {/* Trailing Circle */}
       <div
         ref={trailRef}
-        className="pointer-events-none fixed w-8 h-8 rounded-full border-2 border-beige z-[9998]"
+        className="pointer-events-none fixed w-8 h-8 rounded-full border-2 border-onyx z-[9998]"
         style={{
           transform: 'translate(-50%, -50%)',
           mixBlendMode: 'difference',

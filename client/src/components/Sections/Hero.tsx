@@ -91,7 +91,7 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-screen bg-charcoal overflow-hidden pt-20"
+      className="relative w-full h-screen bg-alabaster overflow-hidden pt-20"
     >
       {/* Split Screen Layout */}
       <div className="absolute inset-0 flex">
@@ -99,7 +99,7 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
         <div className="w-full md:w-1/2 flex flex-col justify-center px-8 md:px-12 z-10">
           <div className="max-w-lg">
             <h1
-              className="text-6xl md:text-7xl font-black text-cream mb-6"
+              className="text-6xl md:text-7xl font-black text-onyx mb-6"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 letterSpacing: '-0.03em',
@@ -110,7 +110,7 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
             </h1>
 
             <p
-              className="hero-subtitle text-lg text-beige-light mb-8"
+              className="hero-subtitle text-lg text-warm-silver mb-8"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
@@ -120,15 +120,14 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
               Experience luxury hair transformation with our award-winning stylists. From intricate braiding to vibrant color, we craft your perfect look.
             </p>
 
-            <button
-              className="hero-cta px-8 py-3 bg-beige text-charcoal font-semibold hover:bg-beige-light transition-colors duration-300"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '0.1em',
-              }}
-            >
-              BOOK CONSULTATION
-            </button>
+            <a href="https://asanteyhair.as.me/" target="_blank" rel="noopener noreferrer">
+              <button
+                className="hero-cta px-8 py-4 bg-onyx text-alabaster font-semibold hover:bg-soft-slate transition-all duration-300 tracking-widest text-sm uppercase"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                Book Appointment
+              </button>
+            </a>
           </div>
         </div>
 
@@ -149,7 +148,7 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
 
           {/* Geometric Divider */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-1 bg-beige"
+            className="absolute left-0 top-0 bottom-0 w-1 bg-champagne"
             style={{
               clipPath: 'polygon(0 0, 100% 10%, 100% 90%, 0 100%)',
             }}
@@ -161,7 +160,7 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
       <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 text-center">
         <div className="hero-tagline">
           <h2
-            className="text-4xl md:text-5xl font-bold text-cream mb-2"
+            className="text-4xl md:text-5xl font-bold text-onyx mb-2"
             style={{
               fontFamily: "'Playfair Display', serif",
               letterSpacing: '-0.02em',
@@ -170,13 +169,13 @@ export const Hero: React.FC<{ isLoading?: boolean }> = ({ isLoading = false }) =
             Asantey
           </h2>
           <p
-            className="text-lg md:text-xl font-light text-beige-light tracking-widest uppercase"
+            className="text-lg md:text-xl font-light text-warm-silver tracking-widest uppercase"
             style={{
               fontFamily: "'Inter', sans-serif",
               letterSpacing: '0.15em',
             }}
           >
-            Luxury Salon
+            Hair & Beauty
           </p>
         </div>
       </div>

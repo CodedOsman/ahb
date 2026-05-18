@@ -1,6 +1,39 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Expose raw hex values as Tailwind colour utilities before tokens are resolved */
+@theme {
+  --color-onyx:          #F5F5F0; /* Ivory Cream */
+  --color-obsidian:      #121212; /* Rich Sable */
+  --color-soft-obsidian: #121212;
+
+  --color-alabaster:   #121212; /* Rich Sable */
+  --color-frost:       #F5F5F0; /* Ivory Cream */
+  --color-crisp-frost: #F5F5F0;
+
+  --color-warm-silver: #8C8C8C; /* Cashmere Gray */
+  --color-steel-blue:  #8C8C8C;
+
+  --color-soft-slate:  #D1D1CB; /* Dusty Pearl */
+  --color-ash:         #1E1E1C; /* Deep Espresso */
+  --color-deep-ash:    #1E1E1C;
+
+  --color-champagne:   #AF9B7D; /* Golden Rye */
+  --color-cloud:       #1E1E1C; /* Deep Espresso */
+
+  --color-silk-gray:   #1E1E1C; /* Deep Espresso */
+  --color-mist:        #D1D1CB; /* Dusty Pearl */
+  --color-mist-gray:   #D1D1CB;
+
+  /* Keep old names as aliases so any missed references still work */
+  --color-charcoal:    #121212;
+  --color-cream:       #F5F5F0;
+  --color-beige:       #AF9B7D;
+  --color-beige-light: #D1D1CB;
+  --color-secondary:   #1E1E1C;
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -40,92 +73,120 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* New palette tokens — available as Tailwind utilities */
   --color-charcoal: var(--charcoal);
   --color-cream: var(--cream);
   --color-beige: var(--beige);
   --color-beige-light: var(--beige-light);
+  --color-onyx: var(--onyx);
+  --color-alabaster: var(--alabaster);
+  --color-warm-silver: var(--warm-silver);
+  --color-soft-slate: var(--soft-slate);
+  --color-champagne: var(--champagne);
+  --color-silk-gray: var(--silk-gray);
+  --color-cloud: var(--cloud);
 }
 
 :root {
-  /* Luxury Salon Color Palette */
-  --charcoal: #1a1a1a;
-  --cream: #f5f5f0;
-  --beige: #d4b996;
-  --beige-light: #e8dcc8;
-  --terracotta: #b85c4a;
-  --sage: #7a8a6f;
-  
-  /* Primary Colors */
-  --primary: #d4b996;
-  --primary-foreground: #1a1a1a;
-  --sidebar-primary: #d4b996;
-  --sidebar-primary-foreground: #1a1a1a;
-  --chart-1: #d4b996;
-  --chart-2: #b85c4a;
-  --chart-3: #7a8a6f;
-  --chart-4: #1a1a1a;
-  --chart-5: #f5f5f0;
-  
+  /* ─── New Dark Sable Luxury Color Palette ─── */
+  --onyx:        #F5F5F0;  /* Ivory Cream   - primary typography */
+  --alabaster:   #121212;  /* Rich Sable    - primary background */
+  --warm-silver: #8C8C8C;  /* Cashmere Gray - alternative accent for links or icons */
+  --soft-slate:  #D1D1CB;  /* Dusty Pearl   - standard body typography */
+  --champagne:   #AF9B7D;  /* Golden Rye    - CTA, buttons, accent elements */
+  --silk-gray:   #1E1E1C;  /* Deep Espresso - secondary background sections */
+  --cloud:       #1E1E1C;  /* Deep Espresso - secondary background sections */
+  --mist-gray:   #2D2D2A;  /* Subtle dark border */
+
+  /* Keep semantic aliases pointing at new palette */
+  --charcoal:    var(--alabaster);
+  --cream:       var(--onyx);        /* primary foreground text */
+  --beige:       var(--champagne);   /* CTAs will use Golden Rye */
+  --beige-light: var(--soft-slate);
+
+  /* Radix / ShadCN semantic tokens — all mapped to light palette */
   --radius: 0.65rem;
-  --background: #1a1a1a;
-  --foreground: #f5f5f0;
-  --card: #262626;
-  --card-foreground: #f5f5f0;
-  --popover: #262626;
-  --popover-foreground: #f5f5f0;
-  --secondary: #2a2a2a;
-  --secondary-foreground: #e8dcc8;
-  --muted: #3a3a3a;
-  --muted-foreground: #a89f8f;
-  --accent: #d4b996;
-  --accent-foreground: #1a1a1a;
-  --destructive: #b85c4a;
-  --destructive-foreground: #f5f5f0;
-  --border: #3a3a3a;
-  --input: #262626;
-  --ring: #d4b996;
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: #f5f5f0;
-  --sidebar-accent: #d4b996;
-  --sidebar-accent-foreground: #1a1a1a;
-  --sidebar-border: #3a3a3a;
-  --sidebar-ring: #d4b996;
+
+  --background:           var(--alabaster);
+  --foreground:           var(--onyx);
+
+  --card:                 var(--silk-gray); /* Deep Espresso */
+  --card-foreground:      var(--onyx);
+
+  --popover:              var(--alabaster);
+  --popover-foreground:   var(--onyx);
+
+  --primary:              var(--onyx);
+  --primary-foreground:   var(--alabaster);
+
+  --secondary:            var(--silk-gray);
+  --secondary-foreground: var(--onyx);
+
+  --muted:                var(--silk-gray);
+  --muted-foreground:     var(--warm-silver);
+
+  --accent:               var(--champagne);
+  --accent-foreground:    var(--alabaster);
+
+  --destructive:          #B85C4A;
+  --destructive-foreground: #FFFFFF;
+
+  --border:               var(--mist-gray);
+  --input:                var(--mist-gray);
+  --ring:                 var(--champagne);
+
+  --chart-1: var(--onyx);
+  --chart-2: var(--soft-slate);
+  --chart-3: var(--warm-silver);
+  --chart-4: var(--champagne);
+  --chart-5: var(--silk-gray);
+
+  /* Admin sidebar — dark theme */
+  --sidebar:              var(--alabaster);
+  --sidebar-foreground:   var(--onyx);
+  --sidebar-primary:      var(--onyx);
+  --sidebar-primary-foreground: var(--alabaster);
+  --sidebar-accent:       var(--champagne);
+  --sidebar-accent-foreground:  var(--alabaster);
+  --sidebar-border:       var(--mist-gray);
+  --sidebar-ring:         var(--champagne);
 }
 
 .dark {
-  /* Dark theme uses the same luxury palette */
-  --primary: #d4b996;
-  --primary-foreground: #1a1a1a;
-  --sidebar-primary: #d4b996;
-  --sidebar-primary-foreground: #1a1a1a;
-  --background: #1a1a1a;
-  --foreground: #f5f5f0;
-  --card: #262626;
-  --card-foreground: #f5f5f0;
-  --popover: #262626;
-  --popover-foreground: #f5f5f0;
-  --secondary: #2a2a2a;
-  --secondary-foreground: #e8dcc8;
-  --muted: #3a3a3a;
-  --muted-foreground: #a89f8f;
-  --accent: #d4b996;
-  --accent-foreground: #1a1a1a;
-  --destructive: #b85c4a;
-  --destructive-foreground: #f5f5f0;
-  --border: #3a3a3a;
-  --input: #262626;
-  --ring: #d4b996;
-  --chart-1: #d4b996;
-  --chart-2: #b85c4a;
-  --chart-3: #7a8a6f;
-  --chart-4: #1a1a1a;
-  --chart-5: #f5f5f0;
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: #f5f5f0;
-  --sidebar-accent: #d4b996;
-  --sidebar-accent-foreground: #1a1a1a;
-  --sidebar-border: #3a3a3a;
-  --sidebar-ring: #d4b996;
+  /* Dark mode keeps the same palette */
+  --background:           var(--alabaster);
+  --foreground:           var(--onyx);
+  --card:                 var(--silk-gray);
+  --card-foreground:      var(--onyx);
+  --popover:              var(--alabaster);
+  --popover-foreground:   var(--onyx);
+  --primary:              var(--onyx);
+  --primary-foreground:   var(--alabaster);
+  --secondary:            var(--silk-gray);
+  --secondary-foreground: var(--onyx);
+  --muted:                var(--silk-gray);
+  --muted-foreground:     var(--warm-silver);
+  --accent:               var(--champagne);
+  --accent-foreground:    var(--alabaster);
+  --destructive:          #B85C4A;
+  --destructive-foreground: #FFFFFF;
+  --border:               var(--mist-gray);
+  --input:                var(--mist-gray);
+  --ring:                 var(--champagne);
+  --chart-1: var(--onyx);
+  --chart-2: var(--soft-slate);
+  --chart-3: var(--warm-silver);
+  --chart-4: var(--champagne);
+  --chart-5: var(--silk-gray);
+  --sidebar:              var(--alabaster);
+  --sidebar-foreground:   var(--onyx);
+  --sidebar-primary:      var(--onyx);
+  --sidebar-primary-foreground: var(--alabaster);
+  --sidebar-accent:       var(--champagne);
+  --sidebar-accent-foreground:  var(--alabaster);
+  --sidebar-border:       var(--mist-gray);
+  --sidebar-ring:         var(--champagne);
 }
 
 @layer base {
@@ -172,6 +233,7 @@
     line-height: 1.8;
     letter-spacing: 0.5px;
   }
+
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -184,22 +246,21 @@
     @apply cursor-pointer;
   }
   
-  /* Remove default scrollbar styling for custom cursor */
   ::-webkit-scrollbar {
     width: 8px;
   }
   
   ::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--silk-gray);
   }
   
   ::-webkit-scrollbar-thumb {
-    background: #d4b996;
+    background: var(--warm-silver);
     border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: #e8dcc8;
+    background: var(--soft-slate);
   }
 }
 

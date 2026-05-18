@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Route, Switch, useLocation } from 'wouter';
 import { Toaster } from '@/components/UI/sonner';
 import { TooltipProvider } from '@/components/UI/tooltip';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -6,72 +7,80 @@ import { CartProvider } from './contexts/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Layout Components
-import { GlobalScroll } from '@/components/Layout/GlobalScroll';
-import { Navigation } from '@/components/Layout/Navigation';
-import { Footer } from '@/components/Layout/Footer';
+import { ClientLayout } from '@/components/Layout/ClientLayout';
+import AdminLayout from '@/components/Layout/AdminLayout';
 
 // UI Components
 import { Preloader } from '@/components/UI/Preloader';
-import { Cursor } from '@/components/UI/Cursor';
-import { Cart } from '@/components/Cart';
 
-// Section Components
-import { Hero } from '@/components/Sections/Hero';
-import { Services } from '@/components/Sections/Services';
-import { Shop } from '@/components/Sections/Shop';
+// Pages
+import Home from './pages/Home';
+import NotFound from './pages/NotFound';
+import ShopPage from './pages/ShopPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ServicesPage from './pages/ServicesPage';
+import AboutPage from './pages/AboutPage';
+import AdminLogin from './pages/Admin/Login';
+import AdminDashboard from './pages/Admin/Dashboard';
+import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
+import AdminServices from './pages/Admin/Services';
+import AdminProducts from './pages/Admin/Products';
+import AdminSettings from './pages/Admin/Settings';
+import AdminOrders from './pages/Admin/Orders';
+import AdminDeliveryZones from './pages/Admin/DeliveryZones';
+import AdminPhotos from './pages/Admin/Photos';
 
-/**
- * Main App Component
- * 
- * Design Philosophy: Cinematic Editorial Sophistication
- * - Integrates all luxury salon components
- * - Manages preloader state and global animations
- * - Provides smooth, cinematic user experience
- */
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [location] = useLocation();
 
   const handlePreloaderComplete = () => {
     setIsLoading(false);
   };
+
+  const isAdminRoute = location.startsWith('/admin');
+  const isLoginPage = location === '/admin';
 
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <CartProvider>
           <TooltipProvider>
-            <GlobalScroll>
-              {/* Preloader */}
-              {isLoading && <Preloader onComplete={handlePreloaderComplete} />}
+            {/* Preloader - Only on client routes */}
+            {!isAdminRoute && isLoading && <Preloader onComplete={handlePreloaderComplete} />}
 
-              {/* Global Cursor */}
-              <Cursor />
+            {isAdminRoute ? (
+              (location === '/admin' || location === '/admin/') ? (
+                <AdminLogin />
+              ) : (
+                <AdminLayout>
+                  <Route path="/admin/dashboard" component={AdminDashboard} />
+                  <Route path="/admin/services" component={AdminServices} />
+                  <Route path="/admin/products" component={AdminProducts} />
+                  <Route path="/admin/settings" component={AdminSettings} />
+                  <Route path="/admin/orders" component={AdminOrders} />
+                  <Route path="/admin/delivery" component={AdminDeliveryZones} />
+                  <Route path="/admin/photos" component={AdminPhotos} />
+                </AdminLayout>
+              )
+            ) : (
+              <ClientLayout isLoading={isLoading} onPreloaderComplete={handlePreloaderComplete}>
+                <Switch>
+                  <Route path="/">
+                    <Home isLoading={isLoading} />
+                  </Route>
+                  <Route path="/shop" component={ShopPage} />
+                  <Route path="/product/:id" component={ProductDetailPage} />
+                  <Route path="/checkout/success" component={CheckoutSuccessPage} />
+                  <Route path="/services" component={ServicesPage} />
+                  <Route path="/about" component={AboutPage} />
+                  <Route path="*" component={NotFound} />
+                </Switch>
+              </ClientLayout>
+            )}
 
-              {/* Navigation */}
-              <Navigation />
-
-              {/* Cart Sidebar */}
-              <Cart />
-
-              {/* Main Content */}
-              <main className="w-full">
-                {/* Hero Section */}
-                <Hero isLoading={isLoading} />
-
-                {/* Services Section */}
-                <Services />
-
-                {/* Shop Section */}
-                <Shop />
-              </main>
-
-              {/* Footer */}
-              <Footer />
-
-              {/* Toast Notifications */}
-              <Toaster />
-            </GlobalScroll>
+            <Toaster />
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>

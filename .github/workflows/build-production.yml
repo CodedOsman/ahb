@@ -41,6 +41,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           mkdir -p /tmp/build-output
           cp -r dist /tmp/build-output
+          cp package.json /tmp/build-output/dist/
+          cp pnpm-lock.yaml /tmp/build-output/dist/
+          cp seed_db.ts /tmp/build-output/dist/
           git branch -D production || true
           git checkout --orphan production
           git reset --hard

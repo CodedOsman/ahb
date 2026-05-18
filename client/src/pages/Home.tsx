@@ -1,10 +1,29 @@
-import App from '@/App';
+import React from 'react';
+import { Hero } from '@/components/Sections/Hero';
+import { Services } from '@/components/Sections/Services';
+import { Shop } from '@/components/Sections/Shop';
+import { Reviews } from '@/components/Sections/Reviews';
 
-/**
- * Home Page - Renders the main App component
- * All content is managed through the App component and its sections
- */
-export default function Home() {
-  return <App />;
+interface HomeProps {
+  isLoading: boolean;
 }
 
+const Home: React.FC<HomeProps> = ({ isLoading }) => {
+  return (
+    <>
+      {/* Hero Section */}
+      <Hero isLoading={isLoading} />
+
+      {/* Services Section */}
+      <Services />
+
+      {/* Shop Section */}
+      <Shop />
+
+      {/* Reviews Section */}
+      <Reviews />
+    </>
+  );
+};
+
+export default Home;

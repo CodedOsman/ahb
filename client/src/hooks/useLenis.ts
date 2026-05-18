@@ -19,10 +19,9 @@ export const useLenis = () => {
       duration: 0.4,
       easing: (t) => t,
       smoothWheel: true,
-      smoothTouch: true,
       touchMultiplier: 1,
       wheelMultiplier: 1,
-    });
+    } as any);
 
     let rafId: number;
 

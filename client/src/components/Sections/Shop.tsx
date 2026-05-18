@@ -1,8 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGSAP } from '@/hooks/useGSAP';
 import { useCart } from '@/contexts/CartContext';
 import gsap from 'gsap';
+import axios from 'axios';
+import { Link } from 'wouter';
 
 /**
  * Boutique Shop Section
@@ -14,53 +16,17 @@ import gsap from 'gsap';
  * - Smooth product reveal animations
  */
 
-const products = [
-  {
-    id: 1,
-    name: 'Silk Hair Serum',
-    price: '$45',
-    category: 'Care',
-    image: 'Product 1',
-  },
-  {
-    id: 2,
-    name: 'Luxury Braid Oil',
-    price: '$38',
-    category: 'Styling',
-    image: 'Product 2',
-  },
-  {
-    id: 3,
-    name: 'Hydration Mask',
-    price: '$52',
-    category: 'Treatment',
-    image: 'Product 3',
-  },
-  {
-    id: 4,
-    name: 'Color Protect Spray',
-    price: '$35',
-    category: 'Protection',
-    image: 'Product 4',
-  },
-  {
-    id: 5,
-    name: 'Premium Brush Set',
-    price: '$89',
-    category: 'Tools',
-    image: 'Product 5',
-  },
-  {
-    id: 6,
-    name: 'Silk Pillowcase',
-    price: '$42',
-    category: 'Accessories',
-    image: 'Product 6',
-  },
-];
+interface Product {
+  id: number;
+  name: string;
+  base_price: string;
+  category_name: string;
+  image_url: string;
+  stock: number;
+}
 
 interface ProductCardProps {
-  product: typeof products[0];
+  product: Product;
   index: number;
 }
 
@@ -99,12 +65,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
     setIsHovered(false);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
-      category: product.category,
+      price: `£${product.base_price}`,
+      category: product.category_name,
     });
   };
 
@@ -123,87 +90,102 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
         transformStyle: 'preserve-3d',
       }}
     >
-      {/* Product Card */}
-      <div className="bg-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
-        {/* Product Image Area */}
-        <div className="relative w-full h-64 bg-gradient-to-br from-beige/20 to-transparent flex items-center justify-center overflow-hidden">
-          <div className="text-center">
-            <p className="text-cream text-sm opacity-50">{product.image}</p>
-          </div>
+      <Link href={`/product/${product.id}`}>
+        <div className="bg-silk-gray rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+          <div className="relative w-full h-64 bg-gradient-to-br from-beige/20 to-transparent flex items-center justify-center overflow-hidden">
+            <div className="text-center">
+              <p className="text-onyx text-sm opacity-50">
+                {product.image_url && !product.image_url.startsWith('Product') ? '' : 'ASANTEY'}
+              </p>
+            </div>
+            {product.image_url && !product.image_url.startsWith('Product') && (
+              <img src={product.image_url} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+            )}
 
-          {/* Overlay on Hover */}
-          <motion.div
-            className="absolute inset-0 bg-black/40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.3 }}
-          />
+            <motion.div
+              className="absolute inset-0 bg-black/40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isHovered ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
+            />
 
-          {/* Quick Add Button */}
-          <motion.button
-            onClick={handleAddToCart}
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-beige text-charcoal font-semibold text-sm hover:bg-beige-light transition-colors duration-300"
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{
-              opacity: isHovered ? 1 : 0,
-              y: isHovered ? 0 : 20,
-              scale: isHovered ? 1 : 0.8,
-            }}
-            transition={{
-              type: 'spring',
-              stiffness: 200,
-              damping: 15,
-            }}
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: '0.05em',
-            }}
-          >
-            QUICK ADD
-          </motion.button>
-        </div>
-
-        {/* Product Info */}
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <h3
-              className="text-lg font-bold text-cream"
-              style={{
-                fontFamily: "'Playfair Display', serif",
+            <motion.button
+              onClick={handleAddToCart}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-onyx text-alabaster font-semibold text-sm hover:bg-champagne transition-colors duration-300 z-10"
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{
+                opacity: isHovered ? 1 : 0,
+                y: isHovered ? 0 : 20,
+                scale: isHovered ? 1 : 0.8,
               }}
+              transition={{
+                type: 'spring',
+                stiffness: 200,
+                damping: 15,
+              }}
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                letterSpacing: '0.05em',
+              }}
+              disabled={product.stock <= 0}
             >
-              {product.name}
-            </h3>
-            <span className="text-beige font-semibold">{product.price}</span>
+              {product.stock <= 0 ? 'OUT OF STOCK' : 'QUICK ADD'}
+            </motion.button>
           </div>
 
-          <p
-            className="text-xs text-beige-light mb-3"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 300,
-            }}
-          >
-            {product.category}
-          </p>
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="flex items-start justify-between mb-2">
+              <h3
+                className="text-lg font-bold text-onyx group-hover:text-soft-slate transition-colors"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                }}
+              >
+                {product.name}
+              </h3>
+              <span className="text-soft-slate font-semibold">£{product.base_price}</span>
+            </div>
 
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className="text-beige text-xs">
-                ★
-              </span>
-            ))}
+            <p
+              className="text-xs text-warm-silver mb-3 font-light"
+            >
+              {product.category_name}
+            </p>
+
+            <div className="flex items-center gap-1 mt-auto">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className="text-soft-slate text-xs">
+                  ★
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
+
     </motion.div>
   );
 };
 
 export const Shop: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get('/api/products');
+        setProducts(res.data.slice(0, 6));
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   useGSAP(() => {
-    // Animate section header on scroll
     gsap.fromTo(
       '.shop-header',
       { opacity: 0, y: 30 },
@@ -223,12 +205,11 @@ export const Shop: React.FC = () => {
   return (
     <section
       id="shop"
-      className="shop-section relative w-full py-24 bg-charcoal"
+      className="shop-section relative w-full py-24 bg-alabaster"
     >
-      {/* Section Header */}
       <div className="shop-header container mx-auto px-4 mb-16">
         <h2
-          className="text-5xl md:text-6xl font-black text-cream mb-4"
+          className="text-5xl md:text-6xl font-black text-onyx mb-4"
           style={{
             fontFamily: "'Playfair Display', serif",
             letterSpacing: '-0.02em',
@@ -237,7 +218,7 @@ export const Shop: React.FC = () => {
           Asantey Shop
         </h2>
         <p
-          className="text-lg text-beige-light max-w-2xl"
+          className="text-lg text-warm-silver max-w-2xl"
           style={{
             fontFamily: "'Inter', sans-serif",
             fontWeight: 300,
@@ -248,30 +229,35 @@ export const Shop: React.FC = () => {
         </p>
       </div>
 
-      {/* Product Grid */}
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-onyx"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* View All Button */}
       <div className="flex justify-center mt-16">
-        <button
-          className="px-8 py-3 border-2 border-beige text-beige font-semibold hover:bg-beige hover:text-charcoal transition-all duration-300"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            letterSpacing: '0.1em',
-          }}
-        >
-          VIEW ALL PRODUCTS
-        </button>
+        <Link href="/shop">
+          <button
+            className="px-8 py-3 border-2 border-onyx text-soft-slate font-semibold hover:bg-champagne hover:text-charcoal transition-all duration-300"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              letterSpacing: '0.1em',
+            }}
+          >
+            VIEW ALL PRODUCTS
+          </button>
+        </Link>
       </div>
     </section>
   );
 };
 
 export default Shop;
-

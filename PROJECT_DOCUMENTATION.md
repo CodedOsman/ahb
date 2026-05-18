@@ -6,25 +6,25 @@ A production-ready, high-end luxury salon website built with React, GSAP, Framer
 
 ---
 
-## Design Philosophy: Cinematic Editorial Sophistication
+## Design Philosophy: Cinematic Fresh Editorial Gallery
 
 The entire website is built around a cinematic, image-first design approach that emphasizes:
 
 - **High-Fashion Editorial Aesthetics**: Each section tells a visual story through carefully composed imagery
 - **Dramatic Visual Storytelling**: Typography overlays on photography with careful contrast management
 - **Smooth, Buttery Animations**: All interactions feel cinematic and professional
-- **Luxury Through Restraint**: Deep charcoal backgrounds with cream typography and beige accents create exclusivity
+- **Luxury Through Dark Sophistication**: A dramatic and highly immersive dark luxury aesthetic composed of Soft Obsidian backgrounds, high-contrast Crisp Frost typography, Mist Gray outlines, Steel Blue accents, and Deep Ash CTA/buttons.
 
 ### Color Palette
 
 | Color | Hex Code | Usage |
 |-------|----------|-------|
-| Deep Charcoal | #1A1A1A | Primary background, creates luxury void |
-| Soft Cream | #F5F5F0 | Primary typography, high contrast |
-| Beige | #D4B996 | CTA buttons, accent elements |
-| Beige Light | #E8DCC8 | Secondary typography, subtle accents |
-| Terracotta | #B85C4A | Service category accents |
-| Sage | #7A8A6F | Alternative accent color |
+| Soft Obsidian | #222222 | Primary background, creating an ultra-premium, dark luxury environment |
+| Crisp Frost | #FCFDFF | Primary typography, headers, and high-contrast elements, maximizing freshness |
+| Mist Gray | #DCDFE1 | Subtle borders, dividers, and UI card outlines |
+| Steel Blue | #465362 | Alternative accent for interactive links, icons, and special text features |
+| Cloud | #F0F2F5 | Secondary background sections and containers |
+| Deep Ash | #3D3D3D | Primary CTA buttons, action backgrounds, and key accent elements |
 
 ### Typography System
 
