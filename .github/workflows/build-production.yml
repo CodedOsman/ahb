@@ -31,16 +31,8 @@ jobs:
           rm -f "$(npm bin -g)/pnpx" || true
           npm install -g pnpm@10.15.1 --force
 
-      - name: Use production package.json
-        run: |
-          if [ -f package.prod.json ]; then
-            cp package.prod.json package.json
-          else
-            echo "package.prod.json not found"; exit 1
-          fi
-
-      - name: Install production dependencies
-        run: pnpm install --prod
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prod=false
 
       - name: Build production assets (frontend + backend)
         run: pnpm build
