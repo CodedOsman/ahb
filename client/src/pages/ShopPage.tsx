@@ -25,35 +25,38 @@ const ShopPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
-          axios.get('/api/products'),
-          axios.get('/api/categories'),
-        ]);
-        setProducts(prodRes.data);
+        const catRes = await axios.get('/api/categories');
         setCategories(catRes.data.filter((c: Category) => c.type === 'product'));
       } catch (error) {
-        console.error('Error fetching shop data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching categories:', error);
       }
     };
 
-    fetchData();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     const fetchFilteredProducts = async () => {
       setLoading(true);
       try {
-        const url = selectedCategory === 'all' 
-          ? '/api/products' 
-          : `/api/products?category=${selectedCategory}`;
+        const params = new URLSearchParams();
+
+        if (selectedCategory !== 'all') {
+          params.set('category', selectedCategory);
+        }
+
+        if (searchQuery.trim()) {
+          params.set('search', searchQuery.trim());
+        }
+
+        const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
         const res = await axios.get(url);
         setProducts(res.data);
       } catch (error) {
@@ -64,7 +67,7 @@ const ShopPage: React.FC = () => {
     };
 
     fetchFilteredProducts();
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
@@ -83,30 +86,44 @@ const ShopPage: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-12">
-          <button
-            onClick={() => setSelectedCategory('all')}
-            className={`px-6 py-3 border font-label-caps text-label-caps transition-all duration-300 rounded-none cursor-pointer ${
-              selectedCategory === 'all' 
-                ? 'bg-primary text-on-primary border-primary' 
-                : 'text-primary border-primary/20 hover:border-primary hover:bg-primary/5'
-            }`}
-          >
-            All Products
-          </button>
-          {categories.map((cat) => (
+        <div className="flex flex-col gap-4 mb-12 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <label htmlFor="shop-search" className="sr-only">Search products</label>
+            <input
+              id="shop-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search products..."
+              className="w-full rounded-none border border-primary/20 bg-surface px-4 py-3 text-sm text-primary outline-none transition duration-200 focus:border-primary focus:ring-2 focus:ring-primary/10"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-4 md:items-center">
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.slug)}
+              onClick={() => setSelectedCategory('all')}
               className={`px-6 py-3 border font-label-caps text-label-caps transition-all duration-300 rounded-none cursor-pointer ${
-                selectedCategory === cat.slug 
+                selectedCategory === 'all' 
                   ? 'bg-primary text-on-primary border-primary' 
                   : 'text-primary border-primary/20 hover:border-primary hover:bg-primary/5'
               }`}
             >
-              {cat.name}
+              All Products
             </button>
-          ))}
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.slug)}
+                className={`px-6 py-3 border font-label-caps text-label-caps transition-all duration-300 rounded-none cursor-pointer ${
+                  selectedCategory === cat.slug 
+                    ? 'bg-primary text-on-primary border-primary' 
+                    : 'text-primary border-primary/20 hover:border-primary hover:bg-primary/5'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Product Grid */}
@@ -194,7 +211,9 @@ const ShopPage: React.FC = () => {
 
         {!loading && products.length === 0 && (
           <div className="text-center py-24">
-            <p className="text-secondary font-body-md text-lg">No products found in this category.</p>
+            <p className="text-secondary font-body-md text-lg">
+              No products found matching your search and selected category.
+            </p>
           </div>
         )}
       </div>
