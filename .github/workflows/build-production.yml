@@ -27,7 +27,7 @@ jobs:
         run: corepack enable
 
       - name: Activate pnpm
-        run: corepack prepare pnpm@latest --activate
+        run: npm install -g pnpm@10.15.1
 
       - name: Use production package.json
         run: |
