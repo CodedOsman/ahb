@@ -35,7 +35,7 @@ const ServicesPage: React.FC = () => {
         <div className="mb-16 text-center">
           <h1 
             className="text-5xl md:text-8xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wider"
-            style={{ fontFamily: "'Bodoni Moda', serif" }}
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Our Services
           </h1>
@@ -77,8 +77,8 @@ const ServicesPage: React.FC = () => {
                   {/* Content Part */}
                   <div className="md:w-1/2 p-8 flex flex-col justify-center">
                     <h3 
-                      className="text-2xl font-bold text-primary mb-4 font-headline-md uppercase tracking-wider"
-                      style={{ fontFamily: "'Bodoni Moda', serif" }}
+                      className="text-2xl text-primary mb-4 font-headline-md uppercase tracking-wider"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
                     >
                       {service.title}
                     </h3>

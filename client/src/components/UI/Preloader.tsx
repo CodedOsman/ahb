@@ -141,7 +141,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         <div className="logo-text absolute opacity-0">
           <h1
             className="text-6xl font-bold text-primary text-center tracking-widest uppercase font-display-lg"
-            style={{ fontFamily: "'Bodoni Moda', serif" }}
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             ASANTEY
           </h1>

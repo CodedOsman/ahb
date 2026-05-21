@@ -73,7 +73,7 @@ const ShopPage: React.FC = () => {
         <div className="mb-12">
           <h1 
             className="text-5xl md:text-7xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wider"
-            style={{ fontFamily: "'Bodoni Moda', serif" }}
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Boutique
           </h1>
@@ -149,8 +149,8 @@ const ShopPage: React.FC = () => {
                               {product.category_name}
                             </p>
                             <h3 
-                              className="text-xl font-bold text-primary group-hover:line-through transition-colors duration-300 font-headline-md uppercase tracking-wide"
-                              style={{ fontFamily: "'Bodoni Moda', serif" }}
+                              className="text-xl text-primary group-hover:line-through transition-colors duration-300 font-headline-md uppercase tracking-wide"
+                              style={{ fontFamily: "'Playfair Display', serif" }}
                             >
                               {product.name}
                             </h3>

@@ -140,7 +140,7 @@ export const Cart: React.FC = () => {
             <div className="flex items-center justify-between p-6 border-b border-primary">
               <h2
                 className="text-2xl font-bold uppercase tracking-widest text-primary"
-                style={{ fontFamily: "'Bodoni Moda', serif" }}
+                style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Cart
               </h2>

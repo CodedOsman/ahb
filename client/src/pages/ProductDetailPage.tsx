@@ -106,7 +106,7 @@ const ProductDetailPage: React.FC = () => {
             </p>
             <h1 
               className="text-4xl md:text-6xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wide"
-              style={{ fontFamily: "'Bodoni Moda', serif" }}
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {product.name}
             </h1>

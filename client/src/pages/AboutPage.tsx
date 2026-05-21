@@ -40,7 +40,7 @@ const AboutPage: React.FC = () => {
           >
             <h1 
               className="text-6xl md:text-8xl font-bold text-primary mb-8 leading-tight font-display-lg tracking-tight uppercase"
-              style={{ fontFamily: "'Bodoni Moda', serif" }}
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               The Art of <br />
               <span className="italic font-medium text-secondary">Sophistication</span>
@@ -71,8 +71,8 @@ const AboutPage: React.FC = () => {
         {/* Narrative Section */}
         <div className="max-w-4xl mx-auto text-center mb-32 border border-primary p-12 bg-surface-container-lowest">
           <h2 
-            className="text-4xl md:text-5xl font-bold text-primary mb-8 font-headline-lg uppercase tracking-widest"
-            style={{ fontFamily: "'Bodoni Moda', serif" }}
+            className="text-4xl md:text-5xl text-primary mb-8 font-headline-lg uppercase tracking-widest"
+            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             About Us
           </h2>
@@ -93,8 +93,8 @@ const AboutPage: React.FC = () => {
         <div className="mb-32">
           <div className="text-center mb-16">
             <h2 
-              className="text-4xl md:text-5xl font-bold text-primary mb-4 uppercase tracking-widest font-headline-lg"
-              style={{ fontFamily: "'Bodoni Moda', serif" }}
+              className="text-4xl md:text-5xl text-primary mb-4 uppercase tracking-widest font-headline-lg"
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Client Gallery
             </h2>
@@ -138,7 +138,7 @@ const AboutPage: React.FC = () => {
           <div className="relative z-10 max-w-2xl mx-auto text-center">
             <h3 
               className="text-3xl font-bold text-primary mb-8 font-headline-md uppercase tracking-widest"
-              style={{ fontFamily: "'Bodoni Moda', serif" }}
+              style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Contact & Location
             </h3>
