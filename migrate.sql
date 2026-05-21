@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS services (
     description TEXT,
     price DECIMAL(10, 2),
     image_url MEDIUMTEXT,
+    booking_link VARCHAR(500),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL

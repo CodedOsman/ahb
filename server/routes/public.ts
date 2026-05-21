@@ -7,7 +7,9 @@ const router = Router();
 // Get all services
 router.get('/services', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM services WHERE is_active = 1');
+    const [rows] = await pool.query(
+      'SELECT id, category_id, title, description, price, image_url, booking_link, is_active FROM services WHERE is_active = 1'
+    );
     res.json(rows);
   } catch (error) {
     console.error('Error fetching services:', error);

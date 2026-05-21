@@ -62,8 +62,11 @@ const ServicesAdmin: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      const token = localStorage.getItem('admin_token');
       const [servicesRes, categoriesRes] = await Promise.all([
-        axios.get('/api/services'),
+        axios.get('/api/admin/services', {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
         axios.get('/api/categories')
       ]);
       setServices(servicesRes.data);
@@ -84,7 +87,7 @@ const ServicesAdmin: React.FC = () => {
         description: service.description,
         price: service.price,
         image_url: service.image_url,
-        booking_link: service.booking_link || '',
+        booking_link: service.booking_link ?? '',
         is_active: !!service.is_active
       });
     } else {

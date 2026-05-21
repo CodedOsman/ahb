@@ -51,17 +51,19 @@ const ServicesPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {services.map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="group relative bg-surface-container-low border border-primary hover:bg-surface-container transition-all duration-500 rounded-none shadow-none p-0 overflow-hidden"
-              >
-                <div className="flex flex-col md:flex-row h-full">
-                  {/* Image Part */}
-                  <div className="md:w-1/2 aspect-square md:aspect-auto overflow-hidden bg-background md:border-r border-b md:border-b-0 border-primary">
+            {services.map((service, index) => {
+              const bookingLink = service.booking_link?.trim() || 'https://asanteyhair.as.me/';
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="group relative bg-surface-container-low border border-primary hover:bg-surface-container transition-all duration-500 rounded-none shadow-none p-0 overflow-hidden"
+                >
+                  <div className="flex flex-col md:flex-row h-full">
+                    {/* Image Part */}
+                    <div className="md:w-1/2 aspect-square md:aspect-auto overflow-hidden bg-background md:border-r border-b md:border-b-0 border-primary">
                     {service.image_url ? (
                       <img 
                         src={service.image_url} 
@@ -91,7 +93,7 @@ const ServicesPage: React.FC = () => {
                         From £{service.price}
                       </span>
                       <a
-                        href={service.booking_link?.trim() || 'https://asanteyhair.as.me/'}
+                        href={bookingLink}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="cursor-pointer"
@@ -104,7 +106,8 @@ const ServicesPage: React.FC = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            );
+          })}
           </div>
         )}
       </div>

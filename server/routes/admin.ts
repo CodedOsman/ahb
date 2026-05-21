@@ -46,7 +46,8 @@ router.post('/login', async (req, res) => {
 router.get('/services', authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT s.*, c.name as category_name
+      SELECT s.id, s.category_id, s.title, s.description, s.price, s.image_url, s.booking_link, s.is_active,
+             c.name as category_name
       FROM services s
       LEFT JOIN categories c ON s.category_id = c.id
       ORDER BY s.created_at DESC
