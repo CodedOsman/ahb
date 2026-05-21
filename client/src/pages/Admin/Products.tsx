@@ -36,6 +36,10 @@ const ProductsAdmin: React.FC = () => {
 
   const [parsingImage, setParsingImage] = useState(false);
 
+  const calculateTotalStock = (lengths: { length: string; price: string; stock: number }[]) => {
+    return lengths.reduce((sum, length) => sum + (Number(length.stock) || 0), 0);
+  };
+
   const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -70,7 +74,9 @@ const ProductsAdmin: React.FC = () => {
         axios.get('/api/categories')
       ]);
       setProducts(productsRes.data);
-      setCategories(categoriesRes.data.filter((c: any) => c.type === 'product'));
+
+      const productCategories = categoriesRes.data.filter((c: any) => String(c.type).toLowerCase() === 'product');
+      setCategories(productCategories.length ? productCategories : categoriesRes.data);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -84,6 +90,7 @@ const ProductsAdmin: React.FC = () => {
       try {
         const res = await axios.get(`/api/products/${product.id}`);
         const fullProduct = res.data;
+        const lengths = fullProduct.lengths || [];
         setEditingProduct(fullProduct);
         setFormData({
           category_id: fullProduct.category_id,
@@ -92,8 +99,8 @@ const ProductsAdmin: React.FC = () => {
           base_price: fullProduct.base_price,
           image_url: fullProduct.image_url,
           is_active: !!fullProduct.is_active,
-          stock: fullProduct.stock || 0,
-          lengths: fullProduct.lengths || []
+          stock: lengths.length ? calculateTotalStock(lengths) : fullProduct.stock || 0,
+          lengths,
         });
       } catch (err) {
         toast.error('Failed to fetch product details');
@@ -118,14 +125,19 @@ const ProductsAdmin: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('admin_token');
+    const payload = {
+      ...formData,
+      stock: formData.lengths.length ? calculateTotalStock(formData.lengths) : formData.stock,
+    };
+
     try {
       if (editingProduct) {
-        await axios.put(`/api/admin/products/${editingProduct.id}`, formData, {
+        await axios.put(`/api/admin/products/${editingProduct.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Product updated');
       } else {
-        await axios.post('/api/admin/products', formData, {
+        await axios.post('/api/admin/products', payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Product created');
@@ -152,22 +164,32 @@ const ProductsAdmin: React.FC = () => {
   };
 
   const addLength = () => {
+    const newLengths = [...formData.lengths, { length: '', price: '', stock: 0 }];
     setFormData({
       ...formData,
-      lengths: [...formData.lengths, { length: '', price: '', stock: 0 }]
+      lengths: newLengths,
+      stock: calculateTotalStock(newLengths),
     });
   };
 
   const removeLength = (index: number) => {
     const newLengths = [...formData.lengths];
     newLengths.splice(index, 1);
-    setFormData({ ...formData, lengths: newLengths });
+    setFormData({
+      ...formData,
+      lengths: newLengths,
+      stock: calculateTotalStock(newLengths),
+    });
   };
 
   const updateLength = (index: number, field: string, value: string) => {
     const newLengths = [...formData.lengths];
     (newLengths[index] as any)[field] = value;
-    setFormData({ ...formData, lengths: newLengths });
+    setFormData({
+      ...formData,
+      lengths: newLengths,
+      stock: calculateTotalStock(newLengths),
+    });
   };
 
   return (

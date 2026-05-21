@@ -98,16 +98,18 @@ router.delete('/services/:id', authenticateToken, async (req, res) => {
 // Manage Products
 router.post('/products', authenticateToken, async (req, res) => {
   const { category_id, name, description, base_price, image_url, is_active, lengths, stock } = req.body;
+  const totalStock = Array.isArray(lengths) && lengths.length
+    ? lengths.reduce((sum: number, len: any) => sum + (Number(len.stock) || 0), 0)
+    : (stock || 0);
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
     const [result]: any = await connection.query(
       'INSERT INTO products (category_id, name, description, base_price, image_url, is_active, stock) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [category_id, name, description, base_price, image_url, is_active === undefined ? 1 : is_active, stock || 0]
+      [category_id, name, description, base_price, image_url, is_active === undefined ? 1 : is_active, totalStock]
     );
 
-    
     const productId = result.insertId;
 
     if (lengths && Array.isArray(lengths)) {
@@ -137,13 +139,16 @@ router.post('/products', authenticateToken, async (req, res) => {
 
 router.put('/products/:id', authenticateToken, async (req, res) => {
   const { category_id, name, description, base_price, image_url, is_active, lengths, stock } = req.body;
+  const totalStock = Array.isArray(lengths) && lengths.length
+    ? lengths.reduce((sum: number, len: any) => sum + (Number(len.stock) || 0), 0)
+    : (stock || 0);
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
     await connection.query(
       'UPDATE products SET category_id = ?, name = ?, description = ?, base_price = ?, image_url = ?, is_active = ?, stock = ? WHERE id = ?',
-      [category_id, name, description, base_price, image_url, is_active, stock || 0, req.params.id]
+      [category_id, name, description, base_price, image_url, is_active, totalStock, req.params.id]
     );
 
     // Update lengths: Delete and re-insert for simplicity or match IDs
@@ -185,9 +190,12 @@ router.get('/products', authenticateToken, async (req, res) => {
     const [lengths]: any = await pool.query('SELECT * FROM product_lengths');
 
     const productsWithLengths = products.map((p: any) => {
+      const productLengths = lengths.filter((l: any) => l.product_id === p.id);
+      const variantStock = productLengths.reduce((sum: number, l: any) => sum + (Number(l.stock) || 0), 0);
       return {
         ...p,
-        lengths: lengths.filter((l: any) => l.product_id === p.id)
+        stock: productLengths.length ? variantStock : p.stock,
+        lengths: productLengths,
       };
     });
 
