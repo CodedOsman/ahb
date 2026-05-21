@@ -27,7 +27,9 @@ jobs:
         run: corepack enable
 
       - name: Activate pnpm
-        run: npm install -g pnpm@10.15.1
+        run: |
+          rm -f "$(npm bin -g)/pnpx" || true
+          npm install -g pnpm@10.15.1 --force
 
       - name: Use production package.json
         run: |
