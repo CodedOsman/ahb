@@ -32,7 +32,7 @@ jobs:
           npm install -g pnpm@10.15.1 --force
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prod=false
+        run: pnpm install
 
       - name: Build production assets (frontend + backend)
         run: pnpm build
