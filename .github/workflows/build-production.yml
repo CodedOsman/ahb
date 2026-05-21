@@ -21,13 +21,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.13'
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Activate pnpm
-        run: corepack prepare pnpm@latest --activate
+        run: corepack prepare pnpm@10.15.1 --activate
 
       - name: Use production package.json
         run: |
