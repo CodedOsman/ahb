@@ -58,11 +58,11 @@ router.get('/services', authenticateToken, async (req, res) => {
 });
 
 router.post('/services', authenticateToken, async (req, res) => {
-  const { category_id, title, description, price, image_url, is_active } = req.body;
+  const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
   try {
     const [result]: any = await pool.query(
-      'INSERT INTO services (category_id, title, description, price, image_url, is_active) VALUES (?, ?, ?, ?, ?, ?)',
-      [category_id, title, description, price, image_url, is_active === undefined ? 1 : is_active]
+      'INSERT INTO services (category_id, title, description, price, image_url, booking_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [category_id, title, description, price, image_url, booking_link || null, is_active === undefined ? 1 : is_active]
     );
     res.json({ id: result.insertId, message: 'Service created' });
   } catch (error) {
@@ -73,11 +73,11 @@ router.post('/services', authenticateToken, async (req, res) => {
 
 
 router.put('/services/:id', authenticateToken, async (req, res) => {
-  const { category_id, title, description, price, image_url, is_active } = req.body;
+  const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
   try {
     await pool.query(
-      'UPDATE services SET category_id = ?, title = ?, description = ?, price = ?, image_url = ?, is_active = ? WHERE id = ?',
-      [category_id, title, description, price, image_url, is_active, req.params.id]
+      'UPDATE services SET category_id = ?, title = ?, description = ?, price = ?, image_url = ?, booking_link = ?, is_active = ? WHERE id = ?',
+      [category_id, title, description, price, image_url, booking_link || null, is_active, req.params.id]
     );
     res.json({ message: 'Service updated' });
   } catch (error) {

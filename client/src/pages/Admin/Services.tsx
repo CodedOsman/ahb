@@ -10,6 +10,7 @@ interface Service {
   description: string;
   price: string;
   image_url: string;
+  booking_link?: string;
   is_active: boolean;
   category_name?: string;
 }
@@ -27,6 +28,7 @@ const ServicesAdmin: React.FC = () => {
     description: '',
     price: '',
     image_url: '',
+    booking_link: '',
     is_active: true
   });
 
@@ -82,6 +84,7 @@ const ServicesAdmin: React.FC = () => {
         description: service.description,
         price: service.price,
         image_url: service.image_url,
+        booking_link: service.booking_link || '',
         is_active: !!service.is_active
       });
     } else {
@@ -92,6 +95,7 @@ const ServicesAdmin: React.FC = () => {
         description: '',
         price: '',
         image_url: '',
+        booking_link: '',
         is_active: true
       });
     }
@@ -235,6 +239,18 @@ const ServicesAdmin: React.FC = () => {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-warm-silver mb-2 font-bold">Booking Link</label>
+                <input
+                  type="url"
+                  value={formData.booking_link}
+                  onChange={(e) => setFormData({ ...formData, booking_link: e.target.value })}
+                  className="w-full bg-alabaster border border-silk-gray/10 p-3 text-onyx outline-none focus:border-onyx transition-all"
+                  placeholder="https://yourbookingpage.com/service"
+                />
+                <p className="text-[9px] text-warm-silver/50 mt-1 font-light italic">Optional: direct customers to this service’s unique booking page.</p>
               </div>
 
               <div>

@@ -8,6 +8,7 @@ interface Service {
   description: string;
   price: string;
   image_url: string;
+  booking_link?: string;
 }
 
 const ServicesPage: React.FC = () => {
@@ -89,7 +90,12 @@ const ServicesPage: React.FC = () => {
                       <span className="text-xl font-bold text-primary font-body-md">
                         From £{service.price}
                       </span>
-                      <a href="https://asanteyhair.as.me/" target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                      <a
+                        href={service.booking_link?.trim() || 'https://asanteyhair.as.me/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer"
+                      >
                         <button className="px-6 py-3 bg-primary text-on-primary border border-primary hover:bg-background hover:text-primary transition-all duration-300 font-label-caps text-label-caps rounded-none cursor-pointer">
                           Book Now
                         </button>

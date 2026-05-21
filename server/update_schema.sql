@@ -15,3 +15,6 @@ INSERT INTO site_settings (`key`, `value`) VALUES
 ('social_facebook', 'https://facebook.com/asantey'),
 ('social_twitter', 'https://twitter.com/asantey'),
 ('footer_description', 'Luxury hair and braiding services for the modern woman.');
+
+-- Add booking link to services if missing
+ALTER TABLE services ADD COLUMN IF NOT EXISTS booking_link VARCHAR(500);
