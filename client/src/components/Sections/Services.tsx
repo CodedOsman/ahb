@@ -1,6 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { useGSAP, ScrollTrigger } from '@/hooks/useGSAP';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'wouter';
 
@@ -11,20 +9,9 @@ interface Service {
   image_url: string;
 }
 
-/**
- * Services Section with Horizontal Scroll
- * 
- * Design Philosophy: Cinematic Editorial Sophistication
- * - Vertical scroll triggers horizontal translation
- * - Multi-card track with parallax movement on internal images
- * - Cinematic card reveals with staggered animation
- */
-
 export const Services: React.FC = () => {
-  const [services, setServices] = React.useState<Service[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -40,177 +27,62 @@ export const Services: React.FC = () => {
     fetchServices();
   }, []);
 
-  useGSAP(() => {
-    if (!containerRef.current || !trackRef.current || services.length === 0) return;
-
-    // Horizontal scroll animation
-    gsap.registerPlugin(ScrollTrigger);
-
-    const track = trackRef.current;
-    const container = containerRef.current;
-
-    gsap.to(track, {
-      x: () => -(track.scrollWidth - container.offsetWidth),
-      scrollTrigger: {
-        trigger: container,
-        start: 'top top',
-        end: () => `+=${track.scrollWidth - container.offsetWidth}`,
-        scrub: 2,
-        pin: true,
-        markers: false,
-        invalidateOnRefresh: true,
-      },
-    });
-
-    // Parallax effect on card images
-    const cards = gsap.utils.toArray('.service-card') as HTMLElement[];
-    cards.forEach((card) => {
-      const image = card.querySelector('.service-image') as HTMLElement;
-      if (image) {
-        gsap.to(image, {
-          y: 30,
-          scrollTrigger: {
-            trigger: card,
-            start: 'top center',
-            end: 'bottom center',
-            scrub: 2,
-          },
-        });
-      }
-    });
-
-    // Staggered card entrance
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: container,
-          start: 'top 80%',
-        },
-      }
-    );
-  }, [services]);
-
   return (
-    <section
-      ref={containerRef}
-      id="services"
-      className="relative w-full py-24 bg-alabaster overflow-hidden"
-    >
+    <section id="services" className="relative w-full py-24 bg-surface overflow-hidden">
       {/* Section Header */}
-      <div className="container mx-auto px-4 mb-16">
-        <h2
-          className="text-5xl md:text-6xl font-black text-onyx mb-4"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Our Services
-        </h2>
-        <p
-          className="text-lg text-warm-silver max-w-2xl"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 300,
-            lineHeight: 1.8,
-          }}
-        >
+      <div className="container mx-auto px-6 mb-16">
+        <span className="font-label-caps text-label-caps border-b border-primary pb-2">EXPERTISE</span>
+        <h2 className="font-headline-lg text-headline-lg mt-4 uppercase">Our Services</h2>
+        <p className="font-body-md text-body-md mt-4 max-w-xl text-on-surface-variant">
           Discover our comprehensive range of luxury hair and styling services, crafted to enhance your natural beauty.
         </p>
       </div>
 
       {/* Horizontal Scroll Track */}
-      <div className="overflow-hidden">
-        <div
-          ref={trackRef}
-          className="flex gap-8 px-4 md:px-12"
-          style={{
-            width: 'fit-content',
-          }}
-        >
-          {services.map((service) => (
-            <Link
-              key={service.id}
-              href="/services"
-              className="service-card flex-shrink-0 w-80 h-96 bg-silk-gray rounded-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300 block cursor-pointer"
-              style={{
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
-              }}
-            >
-              {/* Card Image/Icon Area */}
-              <div
-                className="service-image w-full h-48 bg-gradient-to-br from-beige/30 to-transparent flex items-center justify-center relative overflow-hidden"
+      <div className="overflow-x-auto overflow-y-hidden py-4 snap-x snap-mandatory scroll-smooth">
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary" />
+          </div>
+        ) : (
+          <div className="flex gap-6 px-6">
+            {services.map((service) => (
+              <Link
+                key={service.id}
+                href="/services"
+                className="service-card flex-none w-[45%] min-w-[260px] max-w-[320px] border-r border-b border-primary p-8 group hover:bg-black hover:text-white transition-colors duration-500 shrink-0 cursor-pointer block"
               >
-                {service.image_url ? (
-                  <img
-                    src={service.image_url}
-                    alt="Service image"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-6xl opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-                    ASANTEY
-                  </span>
-                )}
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-
-
-              {/* Card Content */}
-              <div className="p-6 flex flex-col justify-between h-48">
-                <div>
-                  <h3
-                    className="text-2xl font-bold text-onyx mb-3"
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                    }}
-                  >
-                    {service.title}
-                  </h3>
-                  <p
-                    className="text-sm text-warm-silver"
-                    style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 300,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {service.description}
-                  </p>
+                {/* Image container with fixed aspect ratio */}
+                <div className="aspect-[4/3] mb-8 overflow-hidden bg-surface-container">
+                  {service.image_url ? (
+                    <img
+                      src={service.image_url}
+                      alt={service.title}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-secondary-container flex items-center justify-center font-label-caps text-label-caps text-on-secondary-container">
+                      ASANTEY
+                    </div>
+                  )}
                 </div>
-
-                {/* Learn More Link */}
-                <span
-                  className="text-soft-slate text-sm font-semibold group-hover:text-warm-silver transition-colors duration-300 inline-flex items-center gap-2"
-                  style={{
-                    fontFamily: "'Inter', sans-serif",
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Learn More →
+                <h3 className="font-headline-md text-headline-md mb-4 uppercase">{service.title}</h3>
+                <p className="font-body-md text-body-md mb-6 opacity-80 line-clamp-3">{service.description}</p>
+                <span className="font-label-caps text-label-caps flex items-center gap-2 group-hover:underline">
+                  LEARN MORE <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-soft-slate/50 text-sm"
-           style={{ fontFamily: "'Inter', sans-serif" }}>
-        Scroll to explore
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 font-label-caps text-[10px] text-primary/40 tracking-widest">
+        SCROLL TO EXPLORE
       </div>
     </section>
   );
 };
 
 export default Services;
-

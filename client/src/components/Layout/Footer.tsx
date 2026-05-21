@@ -22,140 +22,99 @@ export const Footer: React.FC = () => {
   }, []);
 
   return (
-    <footer className="bg-alabaster border-t border-silk-gray/10 py-16">
-      <div className="container mx-auto px-4">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          {/* Brand */}
-          <div>
-            <Link href="/">
-              <h3
-                className="text-2xl font-black text-soft-slate mb-4 cursor-pointer"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                ASANTEY
-              </h3>
-            </Link>
-
-            <p
-              className="text-sm text-warm-silver"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 300,
-                lineHeight: 1.8,
+    <footer className="bg-surface pt-24 pb-12 border-t border-primary">
+      <div className="max-w-container-max mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+        <div className="col-span-1 md:col-span-1">
+          <Link href="/">
+            <img 
+              alt="ASANTEY" 
+              className="h-16 w-auto mb-8 cursor-pointer" 
+              src="/images/logo.webp"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
               }}
-            >
-              {settings.footer_description || 'Luxury hair and braiding services for the modern woman.'}
-            </p>
-            <div className="mt-4 text-xs text-warm-silver/60 space-y-1">
-              <p>{settings.contact_address || '358 Radford Road, Nottingham, NG7 5GQ'}</p>
-              <p>{settings.contact_phone || '07827129797'}</p>
-              <p>{settings.contact_email || ''}</p>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4
-              className="text-sm font-bold text-onyx mb-4 uppercase tracking-widest"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Navigation
-            </h4>
-            <ul className="space-y-2">
-              {[
-                { name: 'Services', path: '/services' },
-                { name: 'Shop', path: '/shop' },
-                { name: 'About', path: '/about' }
-              ].map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.path}
-                    className="text-sm text-warm-silver hover:text-soft-slate transition-colors duration-300 font-light"
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4
-              className="text-sm font-bold text-onyx mb-4 uppercase tracking-widest"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {['Blog', 'Careers', 'Privacy Policy', 'Terms of Service'].map((item) => (
-                <li key={item}>
-                  <a
-                    href="#"
-                    className="text-sm text-warm-silver hover:text-soft-slate transition-colors duration-300 font-light"
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4
-              className="text-sm font-bold text-onyx mb-4 uppercase tracking-widest"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Newsletter
-            </h4>
-            <p
-              className="text-sm text-warm-silver mb-4 font-light"
-            >
-              Subscribe for exclusive offers and beauty tips.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 px-3 py-2 bg-silk-gray text-onyx text-sm outline-none border border-silk-gray/10 focus:border-silk-gray/30 transition-all"
-              />
-              <button
-                className="px-4 py-2 bg-onyx text-alabaster font-semibold text-sm hover:bg-champagne transition-colors duration-300"
-              >
-                →
-              </button>
-            </div>
+            />
+          </Link>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-xs mb-8">
+            {settings.footer_description || 'Luxury hair and braiding services for the modern woman. Redefining elegance through artistry.'}
+          </p>
+          <div className="font-body-md text-body-md space-y-2 opacity-70">
+            <p>{settings.contact_address || '358 Radford Road, Nottingham, NG7 5GQ'}</p>
+            <p>{settings.contact_phone || '07827129797'}</p>
+            <p>{settings.contact_email || 'hello@asantey.com'}</p>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-silk-gray/10 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Social Links */}
-          <div className="flex items-center gap-6">
-            {[
-              { name: 'Instagram', url: settings.social_instagram || 'https://www.instagram.com/ahb_salon' },
-              { name: 'TikTok', url: settings.social_tiktok || 'https://www.tiktok.com/@ahbsalon' }
-            ].map((social) => (
-              <a
-                key={social.name}
-                href={social.url || '#'}
+        <div>
+          <h4 className="font-label-caps text-label-caps mb-8">NAVIGATION</h4>
+          <ul className="flex flex-col gap-4 font-body-md text-body-md">
+            <li>
+              <Link href="/services" className="opacity-70 hover:opacity-100 hover:line-through transition-all">
+                SERVICES
+              </Link>
+            </li>
+            <li>
+              <Link href="/shop" className="opacity-70 hover:opacity-100 hover:line-through transition-all">
+                SHOP
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="opacity-70 hover:opacity-100 hover:line-through transition-all">
+                ABOUT
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-label-caps text-label-caps mb-8">COMPANY</h4>
+          <ul className="flex flex-col gap-4 font-body-md text-body-md">
+            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">BLOG</a></li>
+            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CAREERS</a></li>
+            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">POLICIES</a></li>
+            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CONTACT</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-label-caps text-label-caps mb-8">SOCIAL</h4>
+          <ul className="flex flex-col gap-4 font-body-md text-body-md">
+            <li>
+              <a 
+                className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                href={settings.social_instagram || 'https://www.instagram.com/ahb_salon'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-warm-silver hover:text-soft-slate transition-colors duration-300 font-light"
               >
-                {social.name}
+                INSTAGRAM
               </a>
-            ))}
-          </div>
+            </li>
+            <li>
+              <a 
+                className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                href={settings.social_tiktok || 'https://www.tiktok.com/@ahbsalon'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                TIKTOK
+              </a>
+            </li>
+            <li>
+              <a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">
+                PINTEREST
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-          {/* Copyright */}
-          <p
-            className="text-sm text-warm-silver font-light"
-          >
-            © {new Date().getFullYear()} Asantey Hair & Braids. All rights reserved.
-          </p>
+      <div className="max-w-container-max mx-auto px-6 pt-12 border-t border-primary/20 flex flex-col md:flex-row justify-between items-center gap-6">
+        <p className="font-label-caps text-label-caps text-primary opacity-70">
+          © {new Date().getFullYear()} ASANTEY HAIR & BEAUTY. ALL RIGHTS RESERVED.
+        </p>
+        <div className="flex gap-8">
+          <a className="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">TERMS OF SERVICE</a>
+          <a className="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">PRIVACY POLICY</a>
         </div>
       </div>
     </footer>
@@ -163,5 +122,3 @@ export const Footer: React.FC = () => {
 };
 
 export default Footer;
-
-

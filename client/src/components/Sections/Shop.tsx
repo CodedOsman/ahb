@@ -1,20 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useGSAP } from '@/hooks/useGSAP';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import gsap from 'gsap';
 import axios from 'axios';
 import { Link } from 'wouter';
-
-/**
- * Boutique Shop Section
- * 
- * Design Philosophy: Cinematic Editorial Sophistication
- * - 3D Tilt effect using Framer Motion on hover
- * - Quick Add button with staggered spring animation
- * - Gallery-style layout with image-dominant cards
- * - Smooth product reveal animations
- */
 
 interface Product {
   id: number;
@@ -27,143 +14,74 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
-  index: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cardRef.current) return;
-
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
-    const rotateX = (y - 0.5) * 10;
-    const rotateY = (x - 0.5) * -10;
-
-    gsap.to(cardRef.current, {
-      rotationX: rotateX,
-      rotationY: rotateY,
-      duration: 0.3,
-      ease: 'power2.out',
-      transformPerspective: 1000,
-    });
-  };
-
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    gsap.to(cardRef.current, {
-      rotationX: 0,
-      rotationY: 0,
-      duration: 0.5,
-      ease: 'power2.out',
-    });
-    setIsHovered(false);
-  };
+  const [imgError, setImgError] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: `£${product.base_price}`,
-      category: product.category_name,
-    });
+    if (product.stock > 0) {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: `£${product.base_price}`,
+        category: product.category_name,
+      });
+    }
   };
 
+  // Curated elegant fallback images if DB placeholder is used
+  const getFallbackImage = (id: number) => {
+    const fallbacks = [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuClAqq8It38R4jRifD07R8EbPDwH8fTQIulAwdwcxxngHjUotimPsvbFYARWHaCKHw0p2WCIWkuDZm4D6Y8K0THEYUDViZpelCXYf6FoUtkRH4sLo0YkqvOtg0KmN-MRP8shp84GywUkaiJDTq22CTjsKNH6Ig5Y9jDq4CAKUSi4Z9kzUI3JQH6Si5sosMKNa6A4ZpWOrM3CDTG34juNMBXxsQ2OECEXEN0UBhHyyNBSIGg4lgxhmoePzjot5SiMp2WpLwBP9TftGg",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCXZivTAE72U7P_sat3rq4j6YqqrT71BFtEaZ4ESyO0Rpgwf0vr8-KSwBBMIIAbcMMlLPYP43-vaa_1SX0hdpYpltfKrf2pkZfy3UG5yrxnoPKCvV2dJR08vtCK2n6gs81jJNAHujydfuOm2NnBaPgrdzieUguVsL-kec1cKI-VSmTHWsXS0oy0dzN9z_LixLoRtvZxq5YBoji8_4EAgqriwaGQL5L5olzTowT0cQtS_O9fkVSS_ktHu-x0S8QDjfT-2EH4d2lBVcU",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDpiy5oR00aXIfpYXBrpsiHF-72nuBJoEm2pOqh6PoOfBbPHry6bUmT-uKjGBJOHIj1mVThw87HZvKtiK4JFuQZU_08ccTAkB2O9LLeeAhh7K0FC9Uk9YMwjT1BEunBo9j78apVyfC7ZY8Mmn_UP86rIcQF5HvLZ4tCCf_5_F2m3TxY4pkacXElHMSttw3IJczy5YeXjPOUZIHH7MOC9xXpWpwclubPdQNf0YY4ij6ekLn7gu7XKxWs4MAOoEpi-w53z9QEYJ73H5c",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBN-NidL-n2mW_5yiVxbU14cMSzyG4gAHI4rmmszJZBRljPcViVkc-ynuEhoLwP07wE0PuId1lIMGbXmPv3d65Gx4kjx8lN0O4CH2yD4dvlwaFwbctrsvkql25ha6Y8qITFuUgWuRUJqtsdv3QPBLGYd8get9UnbWQc7C29qngbYR1ZSojvS8yka3Do0ywAjhJVpLQUfd_w0DnAm5pCUF8WRpse5bys3VNZm17EEiE7d-lx_61hFqy60OXXvv6yOKwo00k2ac_ML6w"
+    ];
+    return fallbacks[(id - 1) % fallbacks.length];
+  };
+
+  const imageSrc = imgError || !product.image_url || product.image_url.startsWith('Product') 
+    ? getFallbackImage(product.id) 
+    : product.image_url;
+
   return (
-    <motion.div
-      ref={cardRef}
-      className="relative group cursor-pointer"
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      viewport={{ once: true }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transformStyle: 'preserve-3d',
-      }}
-    >
-      <Link href={`/product/${product.id}`}>
-        <div className="bg-silk-gray rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
-          <div className="relative w-full h-64 bg-gradient-to-br from-beige/20 to-transparent flex items-center justify-center overflow-hidden">
-            <div className="text-center">
-              <p className="text-onyx text-sm opacity-50">
-                {product.image_url && !product.image_url.startsWith('Product') ? '' : 'ASANTEY'}
-              </p>
-            </div>
-            {product.image_url && !product.image_url.startsWith('Product') && (
-              <img src={product.image_url} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
-            )}
-
-            <motion.div
-              className="absolute inset-0 bg-black/40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isHovered ? 1 : 0 }}
-              transition={{ duration: 0.3 }}
-            />
-
-            <motion.button
-              onClick={handleAddToCart}
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-onyx text-alabaster font-semibold text-sm hover:bg-champagne transition-colors duration-300 z-10"
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{
-                opacity: isHovered ? 1 : 0,
-                y: isHovered ? 0 : 20,
-                scale: isHovered ? 1 : 0.8,
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-                damping: 15,
-              }}
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '0.05em',
-              }}
-              disabled={product.stock <= 0}
-            >
-              {product.stock <= 0 ? 'OUT OF STOCK' : 'QUICK ADD'}
-            </motion.button>
-          </div>
-
-          <div className="p-4 flex-1 flex flex-col">
-            <div className="flex items-start justify-between mb-2">
-              <h3
-                className="text-lg font-bold text-onyx group-hover:text-soft-slate transition-colors"
-                style={{
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
-                {product.name}
-              </h3>
-              <span className="text-soft-slate font-semibold">£{product.base_price}</span>
-            </div>
-
-            <p
-              className="text-xs text-warm-silver mb-3 font-light"
-            >
-              {product.category_name}
-            </p>
-
-            <div className="flex items-center gap-1 mt-auto">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="text-soft-slate text-xs">
-                  ★
-                </span>
-              ))}
-            </div>
+    <Link href={`/product/${product.id}`} className="group cursor-pointer block">
+      <div>
+        <div className="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
+          <img
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            src={imageSrc}
+            onError={() => setImgError(true)}
+          />
+          {/* Quick Add Slide-up Label */}
+          <div
+            onClick={handleAddToCart}
+            className="absolute bottom-0 left-0 right-0 py-4 bg-white text-black font-label-caps text-center text-[11px] font-bold transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out cursor-pointer z-10 hover:bg-neutral-200"
+          >
+            {product.stock <= 0 ? 'OUT OF STOCK' : 'QUICK ADD'}
           </div>
         </div>
-      </Link>
 
-    </motion.div>
+        <div className="flex justify-between items-start mt-2">
+          <div>
+            <h3 className="font-label-caps text-label-caps uppercase text-white tracking-wider line-clamp-1">
+              {product.name}
+            </h3>
+            <p className="text-[10px] text-white opacity-60 mt-1 uppercase tracking-widest">
+              {product.category_name}
+            </p>
+          </div>
+          <span className="font-label-caps text-label-caps text-white shrink-0">
+            £{parseFloat(product.base_price).toFixed(2)}
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 };
 
@@ -175,7 +93,8 @@ export const Shop: React.FC = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get('/api/products');
-        setProducts(res.data.slice(0, 6));
+        // Take first 4 products to fit in 4-column layout like code.html
+        setProducts(res.data.slice(0, 4));
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -185,76 +104,42 @@ export const Shop: React.FC = () => {
     fetchProducts();
   }, []);
 
-  useGSAP(() => {
-    gsap.fromTo(
-      '.shop-header',
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.shop-section',
-          start: 'top 80%',
-        },
-      }
-    );
-  }, []);
-
   return (
-    <section
-      id="shop"
-      className="shop-section relative w-full py-24 bg-alabaster"
-    >
-      <div className="shop-header container mx-auto px-4 mb-16">
-        <h2
-          className="text-5xl md:text-6xl font-black text-onyx mb-4"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Asantey Shop
-        </h2>
-        <p
-          className="text-lg text-warm-silver max-w-2xl"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            fontWeight: 300,
-            lineHeight: 1.8,
-          }}
-        >
-          Curated luxury hair care products and styling tools to maintain your beautiful look at home.
-        </p>
-      </div>
+    <section id="shop" className="bg-primary text-on-primary py-24">
+      <div className="max-w-container-max mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+          <div>
+            <span className="font-label-caps text-label-caps border-b border-on-primary pb-2 opacity-60">
+              CURATED COLLECTION
+            </span>
+            <h2 className="font-headline-lg text-headline-lg mt-4 text-white uppercase">
+              Asantey Shop
+            </h2>
+            <p className="font-body-md text-body-md mt-4 max-w-md opacity-70 text-white">
+              Curated luxury hair care products and styling tools to maintain your beautiful look at home.
+            </p>
+          </div>
+        </div>
 
-      <div className="container mx-auto px-4">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-onyx"></div>
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
-      </div>
 
-      <div className="flex justify-center mt-16">
-        <Link href="/shop">
-          <button
-            className="px-8 py-3 border-2 border-onyx text-soft-slate font-semibold hover:bg-champagne hover:text-charcoal transition-all duration-300"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: '0.1em',
-            }}
-          >
-            VIEW ALL PRODUCTS
-          </button>
-        </Link>
+        <div className="mt-16 text-center">
+          <Link href="/shop">
+            <button className="font-label-caps text-label-caps border border-white text-white px-12 py-4 hover:bg-white hover:text-black transition-all cursor-pointer">
+              VIEW ALL PRODUCTS
+            </button>
+          </Link>
+        </div>
       </div>
     </section>
   );

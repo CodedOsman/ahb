@@ -1,192 +1,222 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Expose raw hex values as Tailwind colour utilities before tokens are resolved */
+/* Configure Tailwind v4 Theme Tokens */
 @theme {
-  --color-onyx:          #F5F5F0; /* Ivory Cream */
-  --color-obsidian:      #121212; /* Rich Sable */
-  --color-soft-obsidian: #121212;
+  --color-surface-container-low: #f5f3f3;
+  --color-secondary-container: #dfe0e0;
+  --color-on-tertiary-fixed-variant: #474747;
+  --color-on-tertiary-fixed: #1b1b1b;
+  --color-error-container: #ffdad6;
+  --color-surface-bright: #fbf9f9;
+  --color-outline: #7e7576;
+  --color-on-surface-variant: #4c4546;
+  --color-surface-container-high: #e9e8e7;
+  --color-surface-container-highest: #e3e2e2;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-fixed-variant: #454747;
+  --color-tertiary-fixed: #e2e2e2;
+  --color-inverse-primary: #c6c6c6;
+  --color-tertiary: #000000;
+  --color-on-background: #1b1c1c;
+  --color-on-primary: #ffffff;
+  --color-surface-container-lowest: #ffffff;
+  --color-secondary-fixed: #e2e2e2;
+  --color-on-primary-fixed-variant: #474747;
+  --color-on-surface: #1b1c1c;
+  --color-surface-dim: #dbdad9;
+  --color-inverse-on-surface: #f2f0f0;
+  --color-inverse-surface: #303031;
+  --color-on-error-container: #93000a;
+  --color-surface-tint: #5e5e5e;
+  --color-outline-variant: #cfc4c5;
+  --color-primary-fixed-dim: #c6c6c6;
+  --color-background: #fbf9f9;
+  --color-on-secondary-fixed: #1a1c1c;
+  --color-surface-variant: #e3e2e2;
+  --color-surface-container: #efeded;
+  --color-tertiary-container: #1b1b1b;
+  --color-on-secondary-container: #616363;
+  --color-on-tertiary: #ffffff;
+  --color-surface: #fbf9f9;
+  --color-on-primary-fixed: #1b1b1b;
+  --color-secondary: #5d5f5f;
+  --color-on-tertiary-container: #848484;
+  --color-on-primary-container: #848484;
+  --color-tertiary-fixed-dim: #c6c6c6;
+  --color-secondary-fixed-dim: #c6c6c7;
+  --color-error: #ba1a1a;
+  --color-primary: #000000;
+  --color-primary-fixed: #e2e2e2;
+  --color-primary-container: #1b1b1b;
+  --color-on-error: #ffffff;
+  --color-border: #000000;
+  --color-input: #e3e2e2;
+  --color-ring: #000000;
+  --color-foreground: #1b1c1c;
+  --color-card: #efeded;
+  --color-card-foreground: #1b1c1c;
+  --color-popover: #fbf9f9;
+  --color-popover-foreground: #1b1c1c;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #efeded;
+  --color-muted-foreground: #5d5f5f;
+  --color-accent: #000000;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #ffffff;
 
-  --color-alabaster:   #121212; /* Rich Sable */
-  --color-frost:       #F5F5F0; /* Ivory Cream */
-  --color-crisp-frost: #F5F5F0;
+  --spacing-container-max: 1280px;
+  --spacing-section-gap: 120px;
+  --spacing-gutter: 24px;
+  --spacing-base: 8px;
 
-  --color-warm-silver: #8C8C8C; /* Cashmere Gray */
-  --color-steel-blue:  #8C8C8C;
-
-  --color-soft-slate:  #D1D1CB; /* Dusty Pearl */
-  --color-ash:         #1E1E1C; /* Deep Espresso */
-  --color-deep-ash:    #1E1E1C;
-
-  --color-champagne:   #AF9B7D; /* Golden Rye */
-  --color-cloud:       #1E1E1C; /* Deep Espresso */
-
-  --color-silk-gray:   #1E1E1C; /* Deep Espresso */
-  --color-mist:        #D1D1CB; /* Dusty Pearl */
-  --color-mist-gray:   #D1D1CB;
-
-  /* Keep old names as aliases so any missed references still work */
-  --color-charcoal:    #121212;
-  --color-cream:       #F5F5F0;
-  --color-beige:       #AF9B7D;
-  --color-beige-light: #D1D1CB;
-  --color-secondary:   #1E1E1C;
+  /* Aliases for the old color variables to ensure nothing breaks */
+  --color-charcoal: #000000;
+  --color-cream: #fbf9f9;
+  --color-beige: #000000;
+  --color-beige-light: #efeded;
+  --color-onyx: #1b1c1c;
+  --color-alabaster: #fbf9f9;
+  --color-warm-silver: #5d5f5f;
+  --color-soft-slate: #4c4546;
+  --color-champagne: #000000;
+  --color-silk-gray: #e3e2e2;
+  --color-cloud: #efeded;
 }
 
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  /* New palette tokens — available as Tailwind utilities */
-  --color-charcoal: var(--charcoal);
-  --color-cream: var(--cream);
-  --color-beige: var(--beige);
-  --color-beige-light: var(--beige-light);
-  --color-onyx: var(--onyx);
-  --color-alabaster: var(--alabaster);
-  --color-warm-silver: var(--warm-silver);
-  --color-soft-slate: var(--soft-slate);
-  --color-champagne: var(--champagne);
-  --color-silk-gray: var(--silk-gray);
-  --color-cloud: var(--cloud);
+/* Custom Tailwind v4 Utilities matching code.html custom styles */
+@utility font-label-caps {
+  font-family: 'Hanken Grotesk', sans-serif;
+  text-transform: uppercase;
+}
+@utility text-label-caps {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+@utility font-headline-lg-mobile {
+  font-family: 'Bodoni Moda', serif;
+}
+@utility text-headline-lg-mobile {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+}
+@utility font-body-md {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+@utility text-body-md {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+@utility font-body-lg {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+@utility text-body-lg {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+}
+@utility font-display-lg {
+  font-family: 'Bodoni Moda', serif;
+}
+@utility text-display-lg {
+  font-size: 72px;
+  line-height: 80px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+@utility font-headline-md {
+  font-family: 'Bodoni Moda', serif;
+}
+@utility text-headline-md {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 500;
+}
+@utility font-headline-lg {
+  font-family: 'Bodoni Moda', serif;
+}
+@utility text-headline-lg {
+  font-size: 48px;
+  line-height: 56px;
+  font-weight: 600;
 }
 
 :root {
-  /* ─── New Dark Sable Luxury Color Palette ─── */
-  --onyx:        #F5F5F0;  /* Ivory Cream   - primary typography */
-  --alabaster:   #121212;  /* Rich Sable    - primary background */
-  --warm-silver: #8C8C8C;  /* Cashmere Gray - alternative accent for links or icons */
-  --soft-slate:  #D1D1CB;  /* Dusty Pearl   - standard body typography */
-  --champagne:   #AF9B7D;  /* Golden Rye    - CTA, buttons, accent elements */
-  --silk-gray:   #1E1E1C;  /* Deep Espresso - secondary background sections */
-  --cloud:       #1E1E1C;  /* Deep Espresso - secondary background sections */
-  --mist-gray:   #2D2D2A;  /* Subtle dark border */
+  /* Editorial Color Palette mapping to CSS variables */
+  --background:           #fbf9f9;
+  --foreground:           #1b1c1c;
 
-  /* Keep semantic aliases pointing at new palette */
-  --charcoal:    var(--alabaster);
-  --cream:       var(--onyx);        /* primary foreground text */
-  --beige:       var(--champagne);   /* CTAs will use Golden Rye */
-  --beige-light: var(--soft-slate);
+  --card:                 #efeded;
+  --card-foreground:      #1b1c1c;
 
-  /* Radix / ShadCN semantic tokens — all mapped to light palette */
-  --radius: 0.65rem;
+  --popover:              #fbf9f9;
+  --popover-foreground:   #1b1c1c;
 
-  --background:           var(--alabaster);
-  --foreground:           var(--onyx);
+  --primary:              #000000;
+  --primary-foreground:   #ffffff;
 
-  --card:                 var(--silk-gray); /* Deep Espresso */
-  --card-foreground:      var(--onyx);
+  --secondary:            #5d5f5f;
+  --secondary-foreground: #ffffff;
 
-  --popover:              var(--alabaster);
-  --popover-foreground:   var(--onyx);
+  --muted:                #efeded;
+  --muted-foreground:     #5d5f5f;
 
-  --primary:              var(--onyx);
-  --primary-foreground:   var(--alabaster);
+  --accent:               #000000;
+  --accent-foreground:    #ffffff;
 
-  --secondary:            var(--silk-gray);
-  --secondary-foreground: var(--onyx);
+  --destructive:          #ba1a1a;
+  --destructive-foreground: #ffffff;
 
-  --muted:                var(--silk-gray);
-  --muted-foreground:     var(--warm-silver);
+  --border:               #000000;
+  --input:                #e3e2e2;
+  --ring:                 #000000;
 
-  --accent:               var(--champagne);
-  --accent-foreground:    var(--alabaster);
+  /* Zero border radius for premium editorial high-fashion feel */
+  --radius: 0px;
 
-  --destructive:          #B85C4A;
-  --destructive-foreground: #FFFFFF;
+  /* Aliases for older dark theme variables to prevent breakage */
+  --onyx:        #1b1c1c;
+  --alabaster:   #fbf9f9;
+  --warm-silver: #5d5f5f;
+  --soft-slate:  #4c4546;
+  --champagne:   #000000;
+  --silk-gray:   #e3e2e2;
+  --cloud:       #efeded;
+  --mist-gray:   #000000;
 
-  --border:               var(--mist-gray);
-  --input:                var(--mist-gray);
-  --ring:                 var(--champagne);
-
-  --chart-1: var(--onyx);
-  --chart-2: var(--soft-slate);
-  --chart-3: var(--warm-silver);
-  --chart-4: var(--champagne);
-  --chart-5: var(--silk-gray);
-
-  /* Admin sidebar — dark theme */
-  --sidebar:              var(--alabaster);
-  --sidebar-foreground:   var(--onyx);
-  --sidebar-primary:      var(--onyx);
-  --sidebar-primary-foreground: var(--alabaster);
-  --sidebar-accent:       var(--champagne);
-  --sidebar-accent-foreground:  var(--alabaster);
-  --sidebar-border:       var(--mist-gray);
-  --sidebar-ring:         var(--champagne);
+  --charcoal:    var(--primary);
+  --cream:       var(--background);
+  --beige:       var(--primary);
+  --beige-light: var(--muted);
 }
 
 .dark {
-  /* Dark mode keeps the same palette */
-  --background:           var(--alabaster);
-  --foreground:           var(--onyx);
-  --card:                 var(--silk-gray);
-  --card-foreground:      var(--onyx);
-  --popover:              var(--alabaster);
-  --popover-foreground:   var(--onyx);
-  --primary:              var(--onyx);
-  --primary-foreground:   var(--alabaster);
-  --secondary:            var(--silk-gray);
-  --secondary-foreground: var(--onyx);
-  --muted:                var(--silk-gray);
-  --muted-foreground:     var(--warm-silver);
-  --accent:               var(--champagne);
-  --accent-foreground:    var(--alabaster);
-  --destructive:          #B85C4A;
-  --destructive-foreground: #FFFFFF;
-  --border:               var(--mist-gray);
-  --input:                var(--mist-gray);
-  --ring:                 var(--champagne);
-  --chart-1: var(--onyx);
-  --chart-2: var(--soft-slate);
-  --chart-3: var(--warm-silver);
-  --chart-4: var(--champagne);
-  --chart-5: var(--silk-gray);
-  --sidebar:              var(--alabaster);
-  --sidebar-foreground:   var(--onyx);
-  --sidebar-primary:      var(--onyx);
-  --sidebar-primary-foreground: var(--alabaster);
-  --sidebar-accent:       var(--champagne);
-  --sidebar-accent-foreground:  var(--alabaster);
-  --sidebar-border:       var(--mist-gray);
-  --sidebar-ring:         var(--champagne);
+  /* Set dark mode to same light layout to match design */
+  --background:           #fbf9f9;
+  --foreground:           #1b1c1c;
+  --card:                 #efeded;
+  --card-foreground:      #1b1c1c;
+  --popover:              #fbf9f9;
+  --popover-foreground:   #1b1c1c;
+  --primary:              #000000;
+  --primary-foreground:   #ffffff;
+  --secondary:            #5d5f5f;
+  --secondary-foreground: #ffffff;
+  --muted:                #efeded;
+  --muted-foreground:     #5d5f5f;
+  --accent:               #000000;
+  --accent-foreground:    #ffffff;
+  --destructive:          #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border:               #000000;
+  --input:                #e3e2e2;
+  --ring:                 #000000;
 }
 
 @layer base {
@@ -199,39 +229,31 @@
   }
   
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
-    font-weight: 300;
+    @apply bg-background text-foreground font-body-md text-body-md;
+    background-color: #fbf9f9;
+    color: #1b1c1c;
+    overflow-x: hidden;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
+    font-family: 'Bodoni Moda', serif;
     letter-spacing: -0.02em;
   }
   
   h1 {
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1.1;
+    @apply text-display-lg font-display-lg;
   }
   
   h2 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    line-height: 1.2;
+    @apply text-headline-lg font-headline-lg;
   }
   
   h3 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    line-height: 1.3;
+    @apply text-headline-md font-headline-md;
   }
   
   p {
-    font-weight: 300;
-    line-height: 1.8;
-    letter-spacing: 0.5px;
+    @apply font-body-md leading-relaxed;
   }
 
   button:not(:disabled),
@@ -247,43 +269,26 @@
   }
   
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
   
   ::-webkit-scrollbar-track {
-    background: var(--silk-gray);
+    background: #fbf9f9;
   }
   
   ::-webkit-scrollbar-thumb {
-    background: var(--warm-silver);
-    border-radius: 4px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--soft-slate);
+    background: #000000;
   }
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
-    padding-right: 1rem;
+    padding-left: 24px;
+    padding-right: 24px;
+    max-width: 1280px;
   }
 
   .flex {
@@ -291,18 +296,22 @@
     min-width: 0;
   }
 
-  @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
-      padding-right: 1.5rem;
-    }
+  .hard-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
   }
 
-  @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem; /* 32px - desktop padding */
-      padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
-    }
+  .editorial-line {
+    height: 1px;
+    background-color: #000000;
+    width: 100%;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

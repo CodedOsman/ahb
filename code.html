@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASANTEY | Hair &amp; Beauty Artistry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Hanken+Grotesk:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f5f3f3",
+                        "secondary-container": "#dfe0e0",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "on-tertiary-fixed": "#1b1b1b",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#fbf9f9",
+                        "outline": "#7e7576",
+                        "on-surface-variant": "#4c4546",
+                        "surface-container-high": "#e9e8e7",
+                        "surface-container-highest": "#e3e2e2",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#454747",
+                        "tertiary-fixed": "#e2e2e2",
+                        "inverse-primary": "#c6c6c6",
+                        "tertiary": "#000000",
+                        "on-background": "#1b1c1c",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-primary-fixed-variant": "#474747",
+                        "on-surface": "#1b1c1c",
+                        "surface-dim": "#dbdad9",
+                        "inverse-on-surface": "#f2f0f0",
+                        "inverse-surface": "#303031",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#5e5e5e",
+                        "outline-variant": "#cfc4c5",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "background": "#fbf9f9",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "surface-variant": "#e3e2e2",
+                        "surface-container": "#efeded",
+                        "tertiary-container": "#1b1b1b",
+                        "on-secondary-container": "#616363",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#fbf9f9",
+                        "on-primary-fixed": "#1b1b1b",
+                        "secondary": "#5d5f5f",
+                        "on-tertiary-container": "#848484",
+                        "on-primary-container": "#848484",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "error": "#ba1a1a",
+                        "primary": "#000000",
+                        "primary-fixed": "#e2e2e2",
+                        "primary-container": "#1b1b1b",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "section-gap": "120px",
+                        "gutter": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Bodoni Moda"],
+                        "body-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Bodoni Moda"],
+                        "headline-md": ["Bodoni Moda"],
+                        "headline-lg": ["Bodoni Moda"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "display-lg": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "500"}],
+                        "headline-lg": ["48px", {"lineHeight": "56px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f9;
+            color: #1b1c1c;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hard-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        .editorial-line {
+            height: 1px;
+            background-color: #000000;
+            width: 100%;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- Top Navigation -->
+<header class="fixed top-0 z-50 w-full bg-surface/90 backdrop-blur-md border-b border-primary">
+<div class="flex justify-between items-center w-full h-20 px-gutter max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a class="flex items-center" href="#">
+<img alt="ASANTEY LOGO" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4"/>
+</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-label-caps text-label-caps bg-primary text-on-primary px-4 py-2 hover:line-through transition-all duration-300" href="#">SERVICES</a>
+<a class="font-label-caps text-label-caps text-primary px-4 py-2 hover:line-through transition-all duration-300" href="#">SHOP</a>
+<a class="font-label-caps text-label-caps text-primary px-4 py-2 hover:line-through transition-all duration-300" href="#">GALLERY</a>
+<a class="font-label-caps text-label-caps text-primary px-4 py-2 hover:line-through transition-all duration-300" href="#">ABOUT</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary p-2 hover:scale-95 transition-transform">shopping_cart</button>
+<button class="hidden md:block font-label-caps text-label-caps bg-primary text-on-primary px-6 py-3 hover:opacity-90 active:scale-95 transition-all">BOOK NOW</button>
+<button class="md:hidden material-symbols-outlined text-primary p-2">menu</button>
+</div>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative h-screen w-full overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 z-0">
+<img alt="Luxury Salon Interior" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uipSoXkhetoJ8N3sqfc48MZLn2o_4UEbFV7sjGWrue_QtqZuzsnhjbUMeTU22JOzfQbz7hy2ZCzlxekmDLhClLkxFtP8xQZBq6xtZX7X3W9tDj7PNeHyDEf7jkTpwPkzx5t2CPnpzMTzDrh_kCiXIwIwNL-iPOezSSDr6VTQxpvotVOj0-nlwCFi2pbAwwdmC_Y5Ybc3Wf7yYp7iJJ_BMZfRvBxDwJkch2Nce5OXsv9DzLGL1Y_GiP_zj8"/>
+<div class="absolute inset-0 bg-black/30"></div>
+</div>
+<div class="relative z-10 text-center px-gutter max-w-4xl text-white">
+<h1 class="font-display-lg text-display-lg md:text-[96px] leading-tight mb-6 font-normal">
+                    The Art of <br/> Elegance
+                </h1>
+<p class="font-body-lg text-body-lg mb-10 max-w-xl mx-auto">
+                    Experience luxury hair transformation with our award-winning stylists. From intricate braiding to vibrant color, we craft your perfect look.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button class="font-label-caps text-label-caps bg-primary text-on-primary px-10 py-5 border border-primary hover:bg-white hover:text-black transition-all">
+                        BOOK APPOINTMENT
+                    </button>
+<button class="font-label-caps text-label-caps bg-primary text-on-primary px-10 py-5 border border-primary hover:bg-white hover:text-black transition-all">
+                        BUY HAIR
+                    </button>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section class="max-w-container-max mx-auto px-gutter py-section-gap overflow-hidden">
+<div class="mb-16">
+<span class="font-label-caps text-label-caps border-b border-primary pb-2">EXPERTISE</span>
+<h2 class="font-headline-lg text-headline-lg mt-4">Our Services</h2>
+<p class="font-body-md text-body-md mt-4 max-w-xl text-on-surface-variant">
+                    Discover our comprehensive range of luxury hair and styling services, crafted to enhance your natural beauty.
+                </p>
+</div>
+<div class="flex overflow-x-auto hide-scrollbar gap-0 border-t border-l border-primary">
+<!-- Sew in -->
+<div class="min-w-[300px] md:min-w-[400px] border-r border-b border-primary p-8 group hover:bg-black hover:text-white transition-colors duration-500 shrink-0">
+<div class="aspect-[4/3] mb-8 overflow-hidden">
+<img alt="Sew in service" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBixFicl7WbvaDvGXYwU-OVcq1KQLAw7z5QXj7i0wo4L75oJ560g8XSsXymoRPmcgqg6kv0fJ9MVbxS-HfPCb9oEK_OOvAO_P0Rsj1wj0V3_6IQMowgmG0TrOOBS9D_ztdUnnS18FyhjCLaT6WCp451gNB7wzYJiVjFS8isfNGb9KWFjOFTXKL2E-67xLYphVWUfKquA3D8bJTKMVGBEsNlFwZn1VwJ_PgHX1iyhvb59z_7kRxOvzK-4QuE53XyA2AzCPf-4yqT7Lw"/>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 uppercase">Sew in</h3>
+<p class="font-body-md text-body-md mb-6 opacity-80">Enhance your natural lashes with our premium lash extension service. From classic to volume lashes, achieve your perfect eye look.</p>
+<a class="font-label-caps text-label-caps flex items-center gap-2 group-hover:underline" href="#">
+                        LEARN MORE <span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+<!-- Locs -->
+<div class="min-w-[300px] md:min-w-[400px] border-r border-b border-primary p-8 group hover:bg-black hover:text-white transition-colors duration-500 shrink-0">
+<div class="aspect-[4/3] mb-8 overflow-hidden">
+<img alt="Locs service" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgckoXZsCAH-97S-gqSaT7E6DZQHGvox-IK3_vGQe-0lRgc03ArSsyJiHSuuu7TUgnw0fjvYZltlP6lFmDTFhMpIgRkOxmJje0CgNaUty_Enw-CuWlolvP33ujUb01bP-zLy8RAdUMmDIO3YctK4FHo2qY4dcnkE--FFIX-Kx8tKtF-GjrI7ucjTT0xNM66fQwbVmwYOlYY55Q7tjRiYJtPqKO5I3ZiQZR-C8TtAG0bjCuHhGa4Ieqk_RYHUKS14AFZSlwQQY3wUc"/>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 uppercase">Locs</h3>
+<p class="font-body-md text-body-md mb-6 opacity-80">Perfectly shaped brows to frame your face. Our expert therapists use gentle wax to define and sculpt your ideal brow shape.</p>
+<a class="font-label-caps text-label-caps flex items-center gap-2 group-hover:underline" href="#">
+                        LEARN MORE <span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+<!-- Fulani braids -->
+<div class="min-w-[300px] md:min-w-[400px] border-r border-b border-primary p-8 group hover:bg-black hover:text-white transition-colors duration-500 shrink-0">
+<div class="aspect-[4/3] mb-8 overflow-hidden">
+<img alt="Fulani braids service" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyBYudhQIEMM60G0uCtLTUKWOXWKBMN2nRRERRTNoGjG4jnk4sZ-JMRAi1X9evdViSbTVevwFeSthKPGe4w5bPE4RVyXh0ar7ZOKThWSBTK4OffeJAGVum3XHeGUitLN2r_Iz8um9lBksbNyRljR1FJQWLkuEMTkiV25d9WFDQMr-KGn9LtD2XlURqUcLJF4R2i5JjaZY8WkAHypXHPHawZ9mRnO23uk6xGTOkGhVxODgaRFKOYM8orrFOazulXNki_8N5QRAY7-Q"/>
+</div>
+<h3 class="font-headline-md text-headline-md mb-4 uppercase">Fulani braids</h3>
+<p class="font-body-md text-body-md mb-6 opacity-80">Precise eyebrow threading for a clean, defined shape. A gentle and accurate technique for perfectly arched brows every time.</p>
+<a class="font-label-caps text-label-caps flex items-center gap-2 group-hover:underline" href="#">
+                        LEARN MORE <span class="material-symbols-outlined">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Shop Section -->
+<section class="bg-primary text-on-primary py-section-gap">
+<div class="max-w-container-max mx-auto px-gutter">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+<div>
+<span class="font-label-caps text-label-caps border-b border-on-primary pb-2 opacity-60">CURATED COLLECTION</span>
+<h2 class="font-headline-lg text-headline-lg mt-4">Asantey Shop</h2>
+<p class="font-body-md text-body-md mt-4 max-w-md opacity-70">
+                            Curated luxury hair care products and styling tools to maintain your beautiful look at home.
+                        </p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<!-- Product 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
+<img alt="Raw Cambodian Straight" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClAqq8It38R4jRifD07R8EbPDwH8fTQIulAwdwcxxngHjUotimPsvbFYARWHaCKHw0p2WCIWkuDZm4D6Y8K0THEYUDViZpelCXYf6FoUtkRH4sLo0YkqvOtg0KmN-MRP8shp84GywUkaiJDTq22CTjsKNH6Ig5Y9jDq4CAKUSi4Z9kzUI3JQH6Si5sosMKNa6A4ZpWOrM3CDTG34juNMBXxsQ2OECEXEN0UBhHyyNBSIGg4lgxhmoePzjot5SiMp2WpLwBP9TftGg"/>
+<div class="absolute bottom-0 left-0 p-4 bg-primary text-on-primary font-label-caps text-[10px] transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                QUICK ADD
+                            </div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase">Raw Cambodian Straight</h3>
+<p class="text-[10px] opacity-60 mt-1 uppercase">Raw Cambodian Hair</p>
+</div>
+<span class="font-label-caps text-label-caps">£100.00</span>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
+<img alt="Raw Cambodian Deep Wave" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXZivTAE72U7P_sat3rq4j6YqqrT71BFtEaZ4ESyO0Rpgwf0vr8-KSwBBMIIAbcMMlLPYP43-vaa_1SX0hdpYpltfKrf2pkZfy3UG5yrxnoPKCvV2dJR08vtCK2n6gs81jJNAHujydfuOm2NnBaPgrdzieUguVsL-kec1cKI-VSmTHWsXS0oy0dzN9z_LixLoRtvZxq5YBoji8_4EAgqriwaGQL5L5olzTowT0cQtS_O9fkVSS_ktHu-x0S8QDjfT-2EH4d2lBVcU"/>
+<div class="absolute bottom-0 left-0 p-4 bg-primary text-on-primary font-label-caps text-[10px] transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                QUICK ADD
+                            </div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase">Raw Cambodian Deep Wave</h3>
+<p class="text-[10px] opacity-60 mt-1 uppercase">Raw Cambodian Hair</p>
+</div>
+<span class="font-label-caps text-label-caps">£100.00</span>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
+<img alt="Virgin Burmese Curls" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpiy5oR00aXIfpYXBrpsiHF-72nuBJoEm2pOqh6PoOfBbPHry6bUmT-uKjGBJOHIj1mVThw87HZvKtiK4JFuQZU_08ccTAkB2O9LLeeAhh7K0FC9Uk9YMwjT1BEunBo9j78apVyfC7ZY8Mmn_UP86rIcQF5HvLZ4tCCf_5_F2m3TxY4pkacXElHMSttw3IJczy5YeXjPOUZIHH7MOC9xXpWpwclubPdQNf0YY4ij6ekLn7gu7XKxWs4MAOoEpi-w53z9QEYJ73H5c"/>
+<div class="absolute bottom-0 left-0 p-4 bg-primary text-on-primary font-label-caps text-[10px] transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                QUICK ADD
+                            </div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase">Virgin Burmese Curls</h3>
+<p class="text-[10px] opacity-60 mt-1 uppercase">Virgin Cambodian Hair</p>
+</div>
+<span class="font-label-caps text-label-caps">£90.00</span>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
+<img alt="HD Closure 4x4 - Yaki" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBN-NidL-n2mW_5yiVxbU14cMSzyG4gAHI4rmmszJZBRljPcViVkc-ynuEhoLwP07wE0PuId1lIMGbXmPv3d65Gx4kjx8lN0O4CH2yD4dvlwaFwbctrsvkql25ha6Y8qITFuUgWuRUJqtsdv3QPBLGYd8get9UnbWQc7C29qngbYR1ZSojvS8yka3Do0ywAjhJVpLQUfd_w0DnAm5pCUF8WRpse5bys3VNZm17EEiE7d-lx_61hFqy60OXXvv6yOKwo00k2ac_ML6w"/>
+<div class="absolute bottom-0 left-0 p-4 bg-primary text-on-primary font-label-caps text-[10px] transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                QUICK ADD
+                            </div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase">HD Closure 4x4 - Yaki</h3>
+<p class="text-[10px] opacity-60 mt-1 uppercase">HD Closures &amp; Frontals</p>
+</div>
+<span class="font-label-caps text-label-caps">£80.00</span>
+</div>
+</div>
+</div>
+<div class="mt-16 text-center">
+<button class="font-label-caps text-label-caps border border-on-primary px-12 py-4 hover:bg-on-primary hover:text-primary transition-all">
+                        VIEW ALL PRODUCTS
+                    </button>
+</div>
+</div>
+</section>
+<!-- Google Reviews -->
+<section class="max-w-container-max mx-auto px-gutter py-section-gap">
+<div class="text-center mb-20">
+<span class="font-label-caps text-label-caps">CLIENT VOICE</span>
+<h2 class="font-headline-lg text-headline-lg mt-4 uppercase">Google Reviews</h2>
+<div class="editorial-line w-24 mx-auto my-6"></div>
+<p class="font-body-md text-body-md max-w-2xl mx-auto text-on-surface-variant">
+                    Read what our clients say about their premium hair installations, custom units, and specialized beauty services.
+                </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-0 border border-primary">
+<!-- Review 1 -->
+<div class="p-8 border-r border-b md:border-b-0 border-primary">
+<div class="flex justify-between items-center mb-6">
+<div class="flex gap-0.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-caps text-[10px] opacity-50">1 WEEK AGO</span>
+</div>
+<p class="font-body-md text-body-md italic mb-4">"Absolutely obsessed with my raw Cambodian install! The hair is unbelievably full, soft, and has a gorgeous natural luster. The installation was seamless and the service was absolute luxury. 10/10 recommend!"</p>
+</div>
+<!-- Review 2 -->
+<div class="p-8 border-r border-b md:border-b-0 border-primary">
+<div class="flex justify-between items-center mb-6">
+<div class="flex gap-0.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-caps text-[10px] opacity-50">3 WEEKS AGO</span>
+</div>
+<p class="font-body-md text-body-md italic mb-4">"Hands down the best knotless braids in Nottingham! The parting is so clean, the braids are lightweight, and there was zero tension. The salon atmosphere feels so warm, premium, and welcoming."</p>
+</div>
+<!-- Review 3 -->
+<div class="p-8 border-r border-b md:border-b-0 border-primary">
+<div class="flex justify-between items-center mb-6">
+<div class="flex gap-0.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-caps text-[10px] opacity-50">1 MONTH AGO</span>
+</div>
+<p class="font-body-md text-body-md italic mb-4">"Extremely professional team. Got a revitalizing hair treatment and silk press. My natural hair has never felt so healthy, bouncy, and soft. Asantey is truly a gem!"</p>
+</div>
+<!-- Review 4 -->
+<div class="p-8 border-primary">
+<div class="flex justify-between items-center mb-6">
+<div class="flex gap-0.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-caps text-[10px] opacity-50">2 MONTHS AGO</span>
+</div>
+<p class="font-body-md text-body-md italic mb-4">"The HD closure unit is flawless. The lace is literally invisible, the bleach job is perfect, and it fits like a glove. I get non-stop compliments on this hair. Sarah is a true artist!"</p>
+</div>
+</div>
+<div class="mt-12 text-center">
+<button class="font-label-caps text-label-caps bg-surface-container-high text-primary px-8 py-4 flex items-center gap-2 mx-auto hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined">rate_review</span>
+                    WRITE A REVIEW ON GOOGLE
+                </button>
+</div>
+</section>
+<!-- CTA Newsletter -->
+<section class="border-y border-primary">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-primary">
+<div class="w-full md:w-1/2 p-12 md:p-20">
+<h2 class="font-headline-lg text-headline-lg mb-8 uppercase">Join the Club</h2>
+<p class="font-body-md text-body-md mb-8">Subscribe to receive exclusive offers, luxury hair care tips, and early access to new product drops.</p>
+<form class="flex flex-col gap-4">
+<div class="relative">
+<input class="w-full border-0 border-b border-primary bg-transparent py-4 font-label-caps text-label-caps focus:ring-0 focus:border-b-2 transition-all" placeholder="YOUR EMAIL ADDRESS" type="email"/>
+</div>
+<button class="font-label-caps text-label-caps bg-primary text-on-primary py-4 hover:opacity-90 transition-opacity">SUBSCRIBE</button>
+</form>
+</div>
+<div class="w-full md:w-1/2 flex items-center justify-center p-12 md:p-20">
+<div class="grid grid-cols-2 gap-8 w-full text-center">
+<div>
+<span class="font-display-lg text-[64px] block mb-2">15k+</span>
+<span class="font-label-caps text-label-caps">Happy Clients</span>
+</div>
+<div>
+<span class="font-display-lg text-[64px] block mb-2">12+</span>
+<span class="font-label-caps text-label-caps">Awards Won</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface pt-section-gap pb-12 border-t border-primary">
+<div class="max-w-container-max mx-auto px-gutter grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+<div class="col-span-1 md:col-span-1">
+<img alt="ASANTEY" class="h-16 w-auto mb-8" src="https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4"/>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mb-8">
+                    Luxury hair and braiding services for the modern woman. Redefining elegance through artistry.
+                </p>
+<div class="font-body-md text-body-md space-y-2 opacity-70">
+<p>123 Luxury Lane, Fashion District, NY</p>
+<p>+1 (234) 567-890</p>
+<p>hello@asantey.com</p>
+</div>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps mb-8">NAVIGATION</h4>
+<ul class="flex flex-col gap-4 font-body-md text-body-md">
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">SERVICES</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">SHOP</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">GALLERY</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">ABOUT</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps mb-8">COMPANY</h4>
+<ul class="flex flex-col gap-4 font-body-md text-body-md">
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">BLOG</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CAREERS</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">POLICIES</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CONTACT</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-caps text-label-caps mb-8">SOCIAL</h4>
+<ul class="flex flex-col gap-4 font-body-md text-body-md">
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">INSTAGRAM</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">TIKTOK</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">PINTEREST</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-container-max mx-auto px-gutter pt-12 border-t border-primary/20 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="font-label-caps text-label-caps text-primary opacity-70">© 2024 ASANTEY HAIR &amp; BEAUTY. ALL RIGHTS RESERVED.</p>
+<div class="flex gap-8">
+<a class="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">TERMS OF SERVICE</a>
+<a class="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">PRIVACY POLICY</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions and hover effects
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.classList.add('scale-95');
+                el.classList.add('opacity-80');
+            });
+            el.addEventListener('mouseup', () => {
+                el.classList.remove('scale-95');
+                el.classList.remove('opacity-80');
+            });
+            el.addEventListener('mouseleave', () => {
+                el.classList.remove('scale-95');
+                el.classList.remove('opacity-80');
+            });
+        });
+
+        // Smooth scroll implementation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach(el => {
+            el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+    </script>
+</body></html>

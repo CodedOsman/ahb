@@ -67,17 +67,17 @@ const ShopPage: React.FC = () => {
   }, [selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-alabaster pt-32 pb-24">
+    <div className="min-h-screen bg-background pt-32 pb-24">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12">
           <h1 
-            className="text-5xl md:text-7xl font-black text-onyx mb-6"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="text-5xl md:text-7xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wider"
+            style={{ fontFamily: "'Bodoni Moda', serif" }}
           >
             Boutique
           </h1>
-          <p className="text-warm-silver max-w-2xl text-lg font-light">
+          <p className="text-secondary max-w-2xl text-base font-body-md">
             Discover our curated collection of luxury hair care and premium units.
           </p>
         </div>
@@ -86,11 +86,11 @@ const ShopPage: React.FC = () => {
         <div className="flex flex-wrap gap-4 mb-12">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-6 py-2 border ${
+            className={`px-6 py-3 border font-label-caps text-label-caps transition-all duration-300 rounded-none cursor-pointer ${
               selectedCategory === 'all' 
-                ? 'bg-onyx text-alabaster border-onyx' 
-                : 'text-soft-slate border-silk-gray/30 hover:border-onyx'
-            } transition-all duration-300 uppercase tracking-widest text-xs font-bold`}
+                ? 'bg-primary text-on-primary border-primary' 
+                : 'text-primary border-primary/20 hover:border-primary hover:bg-primary/5'
+            }`}
           >
             All Products
           </button>
@@ -98,11 +98,11 @@ const ShopPage: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.slug)}
-              className={`px-6 py-2 border ${
+              className={`px-6 py-3 border font-label-caps text-label-caps transition-all duration-300 rounded-none cursor-pointer ${
                 selectedCategory === cat.slug 
-                  ? 'bg-onyx text-alabaster border-onyx' 
-                  : 'text-soft-slate border-silk-gray/30 hover:border-onyx'
-              } transition-all duration-300 uppercase tracking-widest text-xs font-bold`}
+                  ? 'bg-primary text-on-primary border-primary' 
+                  : 'text-primary border-primary/20 hover:border-primary hover:bg-primary/5'
+              }`}
             >
               {cat.name}
             </button>
@@ -112,78 +112,77 @@ const ShopPage: React.FC = () => {
         {/* Product Grid */}
         {loading ? (
           <div className="flex justify-center py-24">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-onyx"></div>
+            <div className="animate-spin rounded-none h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence mode='popLayout'>
+            <AnimatePresence exitBeforeEnter>
               {products.map((product) => (
                 <motion.div
                   key={product.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4 }}
-                  className="bg-silk-gray rounded-lg overflow-hidden group border border-silk-gray/5 hover:border-silk-gray/20 transition-all duration-500"
+                  className="bg-surface-container-low rounded-none overflow-hidden group border border-primary hover:bg-surface-container transition-all duration-500 shadow-none flex flex-col"
                 >
-                  <Link href={`/product/${product.id}`}>
-                    <div className="cursor-pointer h-full flex flex-col">
-                      <div className="relative h-80 bg-onyx/50 overflow-hidden">
-                        <div className="absolute inset-0 flex items-center justify-center text-soft-slate/20 text-4xl font-black italic">
-                          {product.image_url && !product.image_url.startsWith('Product') ? '' : 'ASANTEY'}
-                        </div>
-                        {product.image_url && !product.image_url.startsWith('Product') && (
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
+                  <Link href={`/product/${product.id}`} className="cursor-pointer flex-1 flex flex-col">
+                    <div className="relative h-80 bg-background overflow-hidden border-b border-primary">
+                      <div className="absolute inset-0 flex items-center justify-center text-primary/10 text-4xl font-black font-display-lg uppercase">
+                        {product.image_url && !product.image_url.startsWith('Product') ? '' : 'ASANTEY'}
                       </div>
+                      {product.image_url && !product.image_url.startsWith('Product') && (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0"
+                        />
+                      )}
+                    </div>
 
-                      <div className="p-6 flex-1 flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-4">
                           <div>
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-soft-slate mb-1 font-bold">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-secondary mb-1 font-bold font-label-caps">
                               {product.category_name}
                             </p>
                             <h3 
-                              className="text-xl font-bold text-onyx group-hover:text-soft-slate transition-colors duration-300"
-                              style={{ fontFamily: "'Playfair Display', serif" }}
+                              className="text-xl font-bold text-primary group-hover:line-through transition-colors duration-300 font-headline-md uppercase tracking-wide"
+                              style={{ fontFamily: "'Bodoni Moda', serif" }}
                             >
                               {product.name}
                             </h3>
                           </div>
-                          <span className="text-soft-slate font-medium">£{product.base_price}</span>
+                          <span className="text-primary font-bold font-body-md text-base">£{product.base_price}</span>
                         </div>
                         
-                        <p className="text-sm text-warm-silver/70 font-light line-clamp-2 mb-6">
+                        <p className="text-sm text-secondary font-body-md line-clamp-2 mb-6">
                           {product.description}
                         </p>
-
-                        <button
-                          disabled={product.stock <= 0}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            addToCart({
-                              id: product.id,
-                              name: product.name,
-                              price: `£${product.base_price}`,
-                              category: product.category_name,
-                            });
-                          }}
-                          className={`mt-auto w-full py-3 font-bold tracking-[0.1em] text-xs transition-all duration-300 z-10 ${
-                            product.stock <= 0
-                              ? 'bg-transparent border border-red-500 text-red-500 cursor-not-allowed'
-                              : 'bg-transparent border border-onyx text-soft-slate hover:bg-champagne hover:text-charcoal'
-                          }`}
-                        >
-                          {product.stock <= 0 ? 'OUT OF STOCK' : 'ADD TO BAG'}
-                        </button>
                       </div>
+
+                      <button
+                        disabled={product.stock <= 0}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addToCart({
+                            id: product.id,
+                            name: product.name,
+                            price: `£${product.base_price}`,
+                            category: product.category_name,
+                          });
+                        }}
+                        className={`w-full py-4 font-bold tracking-widest text-xs transition-all duration-300 z-10 font-label-caps text-label-caps rounded-none cursor-pointer ${
+                          product.stock <= 0
+                            ? 'bg-transparent border border-error text-error cursor-not-allowed'
+                            : 'bg-primary border border-primary text-on-primary hover:bg-background hover:text-primary'
+                        }`}
+                      >
+                        {product.stock <= 0 ? 'OUT OF STOCK' : 'ADD TO BAG'}
+                      </button>
                     </div>
                   </Link>
 
@@ -195,7 +194,7 @@ const ShopPage: React.FC = () => {
 
         {!loading && products.length === 0 && (
           <div className="text-center py-24">
-            <p className="text-warm-silver text-lg">No products found in this category.</p>
+            <p className="text-secondary font-body-md text-lg">No products found in this category.</p>
           </div>
         )}
       </div>

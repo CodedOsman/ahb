@@ -29,24 +29,24 @@ const ServicesPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-alabaster pt-32 pb-24">
+    <div className="min-h-screen bg-background pt-32 pb-24">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-16 text-center">
           <h1 
-            className="text-5xl md:text-8xl font-black text-onyx mb-6"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            className="text-5xl md:text-8xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wider"
+            style={{ fontFamily: "'Bodoni Moda', serif" }}
           >
             Our Services
           </h1>
-          <p className="text-warm-silver max-w-2xl mx-auto text-lg font-light leading-relaxed">
+          <p className="text-secondary max-w-2xl mx-auto text-base font-body-md leading-relaxed">
             From intricate braiding to premium color treatments, discover our full range of luxury hair and beauty services.
           </p>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-24">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-onyx"></div>
+            <div className="animate-spin rounded-none h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -56,11 +56,11 @@ const ServicesPage: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="group relative bg-silk-gray p-1 border border-silk-gray/10 hover:border-silk-gray/30 transition-all duration-500"
+                className="group relative bg-surface-container-low border border-primary hover:bg-surface-container transition-all duration-500 rounded-none shadow-none p-0 overflow-hidden"
               >
                 <div className="flex flex-col md:flex-row h-full">
                   {/* Image Part */}
-                  <div className="md:w-1/2 aspect-square md:aspect-auto overflow-hidden bg-alabaster">
+                  <div className="md:w-1/2 aspect-square md:aspect-auto overflow-hidden bg-background md:border-r border-b md:border-b-0 border-primary">
                     {service.image_url ? (
                       <img 
                         src={service.image_url} 
@@ -68,7 +68,7 @@ const ServicesPage: React.FC = () => {
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-soft-slate/10 text-4xl font-black italic">
+                      <div className="w-full h-full flex items-center justify-center text-primary/10 text-4xl font-black font-display-lg uppercase">
                         ASANTEY
                       </div>
                     )}
@@ -77,20 +77,20 @@ const ServicesPage: React.FC = () => {
                   {/* Content Part */}
                   <div className="md:w-1/2 p-8 flex flex-col justify-center">
                     <h3 
-                      className="text-3xl font-bold text-onyx mb-4"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                      className="text-2xl font-bold text-primary mb-4 font-headline-md uppercase tracking-wider"
+                      style={{ fontFamily: "'Bodoni Moda', serif" }}
                     >
                       {service.title}
                     </h3>
-                    <p className="text-warm-silver/80 font-light leading-relaxed mb-6">
+                    <p className="text-secondary font-body-md text-sm leading-relaxed mb-6">
                       {service.description}
                     </p>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-2xl font-light text-soft-slate">
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-primary/10">
+                      <span className="text-xl font-bold text-primary font-body-md">
                         From £{service.price}
                       </span>
-                      <a href="https://asanteyhair.as.me/" target="_blank" rel="noopener noreferrer">
-                        <button className="px-6 py-2 bg-onyx text-alabaster font-bold text-xs uppercase tracking-widest hover:bg-champagne transition-all">
+                      <a href="https://asanteyhair.as.me/" target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                        <button className="px-6 py-3 bg-primary text-on-primary border border-primary hover:bg-background hover:text-primary transition-all duration-300 font-label-caps text-label-caps rounded-none cursor-pointer">
                           Book Now
                         </button>
                       </a>

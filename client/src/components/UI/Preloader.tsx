@@ -92,7 +92,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
   return (
     <>
       {/* Main Preloader Container */}
-      <div className="preloader-container fixed inset-0 z-50 bg-alabaster flex items-center justify-center overflow-hidden">
+      <div className="preloader-container fixed inset-0 z-50 bg-background flex items-center justify-center overflow-hidden">
         {/* Hair Bundle SVG Animation */}
         <svg
           width="300"
@@ -103,9 +103,9 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         >
           <defs>
             <linearGradient id="hairGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style={{ stopColor: '#d4b996', stopOpacity: 1 }} />
-              <stop offset="50%" style={{ stopColor: '#e8dcc8', stopOpacity: 0.8 }} />
-              <stop offset="100%" style={{ stopColor: '#f5f5f0', stopOpacity: 0.3 }} />
+              <stop offset="0%" style={{ stopColor: '#000000', stopOpacity: 1 }} />
+              <stop offset="50%" style={{ stopColor: '#474747', stopOpacity: 0.8 }} />
+              <stop offset="100%" style={{ stopColor: '#7e7576', stopOpacity: 0.3 }} />
             </linearGradient>
             <filter id="hairGlow">
               <feGaussianBlur stdDeviation="2" result="coloredBlur" />
@@ -131,7 +131,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
               strokeDashoffset="400"
               filter="url(#hairGlow)"
               style={{
-                filter: 'drop-shadow(0 0 8px rgba(212, 185, 150, 0.4))',
+                filter: 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.2))',
               }}
             />
           ))}
@@ -140,14 +140,14 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
         {/* Logo Text - Appears during split */}
         <div className="logo-text absolute opacity-0">
           <h1
-            className="text-6xl font-black text-soft-slate text-center"
-            style={{ fontFamily: "'Playfair Display', serif", letterSpacing: '-0.03em' }}
+            className="text-6xl font-bold text-primary text-center tracking-widest uppercase font-display-lg"
+            style={{ fontFamily: "'Bodoni Moda', serif" }}
           >
             ASANTEY
           </h1>
           <p
-            className="text-sm text-warm-silver text-center mt-3 tracking-widest"
-            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}
+            className="text-xs text-secondary text-center mt-3 tracking-[0.2em] font-label-caps"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif", fontWeight: 700 }}
           >
             HAIR & BEAUTY
           </p>
@@ -156,7 +156,7 @@ export const Preloader: React.FC<{ onComplete?: () => void }> = ({ onComplete })
 
       {/* Fade overlay for smooth transition */}
       <div
-        className="preloader-overlay fixed inset-0 z-40 bg-alabaster opacity-100"
+        className="preloader-overlay fixed inset-0 z-40 bg-background opacity-100"
         style={{ pointerEvents: 'none' }}
       />
     </>

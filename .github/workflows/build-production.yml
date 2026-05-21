@@ -29,10 +29,18 @@ jobs:
       - name: Activate pnpm
         run: corepack prepare pnpm@latest --activate
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Use production package.json
+        run: |
+          if [ -f package.prod.json ]; then
+            cp package.prod.json package.json
+          else
+            echo "package.prod.json not found"; exit 1
+          fi
 
-      - name: Build production assets
+      - name: Install production dependencies
+        run: pnpm install --prod
+
+      - name: Build production assets (frontend + backend)
         run: pnpm build
 
       - name: Deploy production branch
@@ -41,8 +49,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           mkdir -p /tmp/build-output
           cp -r dist /tmp/build-output
-          cp package.json /tmp/build-output/dist/
-          cp pnpm-lock.yaml /tmp/build-output/dist/
+          # Copy production package manifest so deployments install only runtime deps
+          if [ -f package.prod.json ]; then
+            cp package.prod.json /tmp/build-output/dist/package.json
+          else
+            cp package.json /tmp/build-output/dist/package.json || true
+          fi
+          cp pnpm-lock.yaml /tmp/build-output/dist/ || true
           cp seed_db.ts /tmp/build-output/dist/
           cp -r server /tmp/build-output/dist/
           cp -r shared /tmp/build-output/dist/

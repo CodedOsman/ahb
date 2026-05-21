@@ -25,31 +25,31 @@ const CartItemComponent: React.FC<CartItemProps> = ({ item }) => {
   const subtotal = priceValue * item.quantity;
 
   return (
-    <div className="flex items-center gap-4 py-4 border-b border-silk-gray/10">
+    <div className="flex items-center gap-4 py-4 border-b border-primary/20">
       {/* Product Image Placeholder */}
-      <div className="w-20 h-20 bg-gradient-to-br from-beige/20 to-beige/5 rounded flex items-center justify-center flex-shrink-0">
-        <span className="text-xs text-warm-silver text-center">{item.name.split(' ')[0]}</span>
+      <div className="w-20 h-20 bg-surface-container-high rounded-none flex items-center justify-center flex-shrink-0 border border-primary/10">
+        <span className="text-xs text-primary font-label-caps text-center">{item.name.split(' ')[0]}</span>
       </div>
 
       {/* Product Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-onyx mb-1 truncate">{item.name}</h4>
-        <p className="text-xs text-warm-silver mb-2">{item.category}</p>
-        <p className="text-sm font-semibold text-soft-slate">£{subtotal.toFixed(2)}</p>
+        <h4 className="text-sm font-semibold text-primary mb-1 truncate font-body-md">{item.name}</h4>
+        <p className="text-xs text-secondary mb-2 font-body-md uppercase tracking-wider">{item.category}</p>
+        <p className="text-sm font-bold text-primary">£{subtotal.toFixed(2)}</p>
       </div>
 
       {/* Quantity Controls */}
-      <div className="flex items-center gap-2 bg-onyx/50 rounded px-2 py-1">
+      <div className="flex items-center gap-2 bg-primary/5 rounded-none px-2 py-1 border border-primary/10">
         <button
           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-          className="text-soft-slate hover:text-warm-silver transition-colors w-5 h-5 flex items-center justify-center"
+          className="text-primary hover:text-secondary transition-colors w-5 h-5 flex items-center justify-center font-bold"
         >
           −
         </button>
-        <span className="text-onyx text-xs w-5 text-center">{item.quantity}</span>
+        <span className="text-primary text-xs w-5 text-center font-bold font-body-md">{item.quantity}</span>
         <button
           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-          className="text-soft-slate hover:text-warm-silver transition-colors w-5 h-5 flex items-center justify-center"
+          className="text-primary hover:text-secondary transition-colors w-5 h-5 flex items-center justify-center font-bold"
         >
           +
         </button>
@@ -58,7 +58,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({ item }) => {
       {/* Remove Button */}
       <button
         onClick={() => removeFromCart(item.id)}
-        className="text-warm-silver hover:text-red-400 transition-colors text-lg ml-2"
+        className="text-secondary hover:text-error transition-colors text-lg ml-2 cursor-pointer"
       >
         ✕
       </button>
@@ -120,7 +120,7 @@ export const Cart: React.FC = () => {
         <>
           {/* Backdrop Overlay */}
           <motion.div
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -130,36 +130,36 @@ export const Cart: React.FC = () => {
 
           {/* Cart Panel */}
           <motion.div
-            className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-96 bg-alabaster border-l border-silk-gray/10 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[420px] bg-background border-l border-primary flex flex-col shadow-none"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 220 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-silk-gray/10">
+            <div className="flex items-center justify-between p-6 border-b border-primary">
               <h2
-                className="text-2xl font-black text-soft-slate"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="text-2xl font-bold uppercase tracking-widest text-primary"
+                style={{ fontFamily: "'Bodoni Moda', serif" }}
               >
                 Cart
               </h2>
               <button
                 onClick={toggleCart}
-                className="text-soft-slate hover:text-warm-silver transition-colors text-2xl w-8 h-8 flex items-center justify-center"
+                className="text-primary hover:text-secondary transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Items List */}
-            <div className="flex-1 overflow-y-auto px-6">
+            <div className="flex-1 overflow-y-auto px-6 hide-scrollbar">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <p className="text-onyx text-lg mb-2">Your cart is empty</p>
+                  <p className="text-primary font-headline-md text-xl mb-2">Your cart is empty</p>
                   <p
-                    className="text-warm-silver text-sm"
-                    style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}
+                    className="text-secondary text-sm font-body-md"
+                    style={{ fontFamily: "'Hanken Grotesk', sans-serif", fontWeight: 300 }}
                   >
                     Add items from the shop to get started
                   </p>
@@ -175,33 +175,33 @@ export const Cart: React.FC = () => {
 
             {/* Footer - Checkout */}
             {items.length > 0 && (
-              <div className="border-t border-silk-gray/10 p-6 space-y-4">
+              <div className="border-t border-primary p-6 space-y-4 bg-surface-container-low">
                   <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-warm-silver font-bold">Delivery Zone</label>
+                    <label className="text-[11px] uppercase tracking-widest text-primary font-bold font-label-caps">Delivery Zone</label>
                     <select 
                       value={selectedZoneId}
                       onChange={(e) => setSelectedZoneId(e.target.value)}
-                      className="w-full bg-silk-gray border border-silk-gray/20 p-2 text-onyx outline-none focus:border-onyx text-sm"
+                      className="w-full bg-background border border-primary p-3 text-primary outline-none focus:bg-white text-xs font-label-caps rounded-none"
                     >
                       {deliveryZones.map(zone => (
                         <option key={zone.id} value={zone.id}>
-                          {zone.name} - £{zone.price}
+                          {zone.name.toUpperCase()} - £{zone.price}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   {/* Price Breakdown */}
-                  <div className="space-y-2 text-sm pt-2">
-                    <div className="flex justify-between text-onyx">
+                  <div className="space-y-2 text-xs pt-2 font-label-caps tracking-wider">
+                    <div className="flex justify-between text-primary">
                       <span>Subtotal ({itemCount} items)</span>
-                      <span>£{subtotal.toFixed(2)}</span>
+                      <span className="font-bold">£{subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-warm-silver">
+                    <div className="flex justify-between text-secondary">
                       <span>Delivery</span>
-                      <span>£{deliveryFee.toFixed(2)}</span>
+                      <span className="font-bold">£{deliveryFee.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold text-soft-slate pt-2 border-t border-silk-gray/10">
+                    <div className="flex justify-between text-sm font-bold text-primary pt-2 border-t border-primary/20">
                       <span>Total</span>
                       <span>£{total.toFixed(2)}</span>
                     </div>
@@ -211,17 +211,17 @@ export const Cart: React.FC = () => {
                   <button
                     onClick={handleCheckout}
                     disabled={isCheckingOut}
-                    className="w-full py-3 bg-onyx text-alabaster font-semibold hover:bg-champagne transition-colors duration-300 disabled:opacity-50"
-                    style={{ fontFamily: "'Inter', sans-serif" }}
+                    className="w-full py-4 bg-primary text-on-primary font-bold uppercase tracking-widest text-xs hover:bg-background hover:text-primary border border-primary transition-all duration-300 disabled:opacity-50 cursor-pointer rounded-none"
+                    style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                   >
-                    {isCheckingOut ? 'Redirecting to secure checkout...' : 'Proceed to Checkout'}
+                    {isCheckingOut ? 'Redirecting...' : 'Proceed to Checkout'}
                   </button>
 
                 {/* Continue Shopping */}
                 <button
                   onClick={toggleCart}
-                  className="w-full py-2 border border-silk-gray/30 text-soft-slate hover:border-onyx hover:bg-champagne/5 transition-colors duration-300"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  className="w-full py-4 border border-primary text-primary font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-on-primary transition-all duration-300 cursor-pointer rounded-none"
+                  style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                 >
                   Continue Shopping
                 </button>

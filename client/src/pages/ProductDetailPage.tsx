@@ -50,15 +50,15 @@ const ProductDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-alabaster flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-onyx"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-none h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-alabaster flex items-center justify-center text-onyx">
+      <div className="min-h-screen bg-background flex items-center justify-center text-primary font-headline-md text-xl">
         Product not found
       </div>
     );
@@ -77,7 +77,7 @@ const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-alabaster pt-32 pb-24">
+    <div className="min-h-screen bg-background pt-32 pb-24">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Image Gallery */}
@@ -85,18 +85,13 @@ const ProductDetailPage: React.FC = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="aspect-[4/5] bg-silk-gray rounded-lg overflow-hidden relative"
+            className="aspect-[4/5] bg-surface-container-low rounded-none overflow-hidden border border-primary relative"
           >
-            <div className="absolute inset-0 flex items-center justify-center text-soft-slate/10 text-6xl font-black italic">
-              {product.image_url.startsWith('Product') ? product.image_url : 'ASANTEY'}
-            </div>
-            {product.image_url && !product.image_url.startsWith('Product') && (
-              <img 
-                src={product.image_url} 
-                alt={product.name} 
-                className="w-full h-full object-cover"
-              />
-            )}
+          <img
+            src={product.image_url && !product.image_url.startsWith('Product') ? product.image_url : 'https://via.placeholder.com/400'}
+            alt={product.name}
+            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+          />
           </motion.div>
 
           {/* Product Details */}
@@ -106,22 +101,22 @@ const ProductDetailPage: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="flex flex-col justify-center"
           >
-            <p className="text-xs uppercase tracking-[0.3em] text-soft-slate mb-4 font-bold">
+            <p className="text-xs uppercase tracking-[0.3em] text-secondary mb-4 font-bold font-label-caps">
               {product.category_name}
             </p>
             <h1 
-              className="text-4xl md:text-6xl font-black text-onyx mb-6"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-4xl md:text-6xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wide"
+              style={{ fontFamily: "'Bodoni Moda', serif" }}
             >
               {product.name}
             </h1>
             
-            <p className="text-3xl text-soft-slate mb-8 font-light">
+            <p className="text-3xl text-primary mb-8 font-bold font-body-md">
               {selectedLength ? `£${selectedLength.price}` : `£${product.base_price}`}
             </p>
 
             <div className="prose prose-invert mb-12">
-              <p className="text-warm-silver leading-relaxed font-light">
+              <p className="text-secondary leading-relaxed font-body-md text-base">
                 {product.description}
               </p>
             </div>
@@ -129,7 +124,7 @@ const ProductDetailPage: React.FC = () => {
             {/* Length Selection */}
             {product.lengths && product.lengths.length > 0 && (
               <div className="mb-12">
-                <h4 className="text-xs uppercase tracking-widest text-onyx mb-4 font-bold">
+                <h4 className="text-xs uppercase tracking-widest text-primary mb-4 font-bold font-label-caps">
                   Select Length
                 </h4>
                 <div className="flex flex-wrap gap-3">
@@ -137,10 +132,10 @@ const ProductDetailPage: React.FC = () => {
                     <button
                       key={variant.id}
                       onClick={() => setSelectedLength(variant)}
-                      className={`px-6 py-3 border transition-all duration-300 text-sm ${
+                      className={`px-6 py-3 border transition-all duration-300 text-xs font-label-caps rounded-none cursor-pointer ${
                         selectedLength?.id === variant.id
-                          ? 'bg-onyx text-alabaster border-onyx font-bold'
-                          : 'border-silk-gray/20 text-warm-silver hover:border-onyx'
+                          ? 'bg-primary text-on-primary border-primary font-bold'
+                          : 'border-primary/20 text-secondary hover:border-primary'
                       } ${variant.stock <= 0 ? 'opacity-50 cursor-not-allowed line-through' : ''}`}
                       disabled={variant.stock <= 0}
                     >
@@ -154,24 +149,24 @@ const ProductDetailPage: React.FC = () => {
             <button
               onClick={handleAddToCart}
               disabled={(selectedLength ? selectedLength.stock : product.stock) <= 0}
-              className={`w-full py-5 font-bold tracking-[0.2em] transition-all duration-300 ${
+              className={`w-full py-5 font-bold tracking-widest transition-all duration-300 font-label-caps text-label-caps rounded-none cursor-pointer ${
                 (selectedLength ? selectedLength.stock : product.stock) <= 0 
-                  ? 'bg-alabaster border border-red-500 text-red-500 cursor-not-allowed'
-                  : 'bg-onyx text-alabaster hover:bg-champagne'
+                  ? 'bg-background border border-error text-error cursor-not-allowed'
+                  : 'bg-primary border border-primary text-on-primary hover:bg-background hover:text-primary'
               }`}
             >
               {(selectedLength ? selectedLength.stock : product.stock) <= 0 ? 'OUT OF STOCK' : 'ADD TO SHOPPING BAG'}
             </button>
 
             {/* Additional Info */}
-            <div className="mt-12 grid grid-cols-2 gap-8 border-t border-silk-gray/10 pt-12">
+            <div className="mt-12 grid grid-cols-2 gap-8 border-t border-primary/20 pt-12">
               <div>
-                <h5 className="text-[10px] uppercase tracking-widest text-onyx mb-2 font-bold">Shipping</h5>
-                <p className="text-xs text-warm-silver font-light">Free worldwide shipping on orders over £500.</p>
+                <h5 className="text-[10px] uppercase tracking-widest text-primary mb-2 font-bold font-label-caps">Shipping</h5>
+                <p className="text-xs text-secondary font-body-md">Free worldwide shipping on orders over £500.</p>
               </div>
               <div>
-                <h5 className="text-[10px] uppercase tracking-widest text-onyx mb-2 font-bold">Returns</h5>
-                <p className="text-xs text-warm-silver font-light">14-day return policy for unused items.</p>
+                <h5 className="text-[10px] uppercase tracking-widest text-primary mb-2 font-bold font-label-caps">Returns</h5>
+                <p className="text-xs text-secondary font-body-md">14-day return policy for unused items.</p>
               </div>
             </div>
           </motion.div>
