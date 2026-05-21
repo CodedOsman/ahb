@@ -23,19 +23,11 @@ jobs:
         with:
           node-version: '22.13'
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate pnpm
-        run: |
-          rm -f "$(npm bin -g)/pnpx" || true
-          npm install -g pnpm@10.15.1 --force
-
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci
 
       - name: Build production assets (frontend + backend)
-        run: pnpm build
+        run: npm run build
 
       - name: Deploy production branch
         run: |
@@ -49,8 +41,7 @@ jobs:
           else
             cp package.json /tmp/build-output/dist/package.json || true
           fi
-          cp pnpm-lock.yaml /tmp/build-output/dist/ || true
-          cp seed_db.ts /tmp/build-output/dist/
+          cp seed_db.js /tmp/build-output/dist/
           cp -r server /tmp/build-output/dist/
           cp -r shared /tmp/build-output/dist/
           git branch -D production || true
