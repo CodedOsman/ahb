@@ -9,9 +9,10 @@ async function init() {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'asantey_salon',
   });
 
-  const sqlFile = process.argv[2] || 'server/schema.sql';
+  const sqlFile = process.argv[2] || 'migrate.sql';
   console.log(`Reading SQL from ${sqlFile}...`);
   
   const sql = fs.readFileSync(sqlFile, 'utf8');

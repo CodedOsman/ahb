@@ -17,7 +17,9 @@ async function dump() {
     const [clientPhotos]: any = await connection.query('SELECT * FROM client_photos');
     const [services]: any = await connection.query('SELECT * FROM services');
     const [products]: any = await connection.query('SELECT * FROM products');
-    const [productLengths]: any = await connection.query('SELECT * FROM product_lengths');
+    const [productVariants]: any = await connection.query('SELECT * FROM product_variants');
+    const [deliveryZones]: any = await connection.query('SELECT * FROM delivery_zones');
+    const [reviews]: any = await connection.query('SELECT * FROM reviews');
 
     connection.release();
 
@@ -41,7 +43,9 @@ const siteSettings = ${JSON.stringify(siteSettings, null, 2)};
 const clientPhotos = ${JSON.stringify(clientPhotos, null, 2)};
 const services = ${JSON.stringify(services, null, 2)};
 const products = ${JSON.stringify(products, null, 2)};
-const productLengths = ${JSON.stringify(productLengths, null, 2)};
+const productVariants = ${JSON.stringify(productVariants, null, 2)};
+const deliveryZones = ${JSON.stringify(deliveryZones, null, 2)};
+const reviews = ${JSON.stringify(reviews, null, 2)};
 
 async function seed() {
   try {
@@ -50,13 +54,15 @@ async function seed() {
 
     // Disable foreign key checks to safely truncate
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    await connection.query('TRUNCATE TABLE product_lengths');
+    await connection.query('TRUNCATE TABLE product_variants');
     await connection.query('TRUNCATE TABLE products');
     await connection.query('TRUNCATE TABLE services');
     await connection.query('TRUNCATE TABLE client_photos');
     await connection.query('TRUNCATE TABLE site_settings');
     await connection.query('TRUNCATE TABLE admins');
     await connection.query('TRUNCATE TABLE categories');
+    await connection.query('TRUNCATE TABLE delivery_zones');
+    await connection.query('TRUNCATE TABLE reviews');
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
 
     console.log('Truncated all tables.');
@@ -64,8 +70,8 @@ async function seed() {
     // Seed categories
     for (const cat of categories) {
       await connection.query(
-        'INSERT INTO categories (id, name, slug) VALUES (?, ?, ?)',
-        [cat.id, cat.name, cat.slug]
+        'INSERT INTO categories (id, name, slug, type, created_at) VALUES (?, ?, ?, ?, ?)',
+        [cat.id, cat.name, cat.slug, cat.type, cat.created_at]
       );
     }
     console.log(\`Seeded \${categories.length} categories.\`);
@@ -73,8 +79,8 @@ async function seed() {
     // Seed admins
     for (const admin of admins) {
       await connection.query(
-        'INSERT INTO admins (id, username, password) VALUES (?, ?, ?)',
-        [admin.id, admin.username, admin.password]
+        'INSERT INTO admins (id, username, password_hash, email, created_at) VALUES (?, ?, ?, ?, ?)',
+        [admin.id, admin.username, admin.password_hash, admin.email, admin.created_at]
       );
     }
     console.log(\`Seeded \${admins.length} admins.\`);
@@ -115,14 +121,32 @@ async function seed() {
     }
     console.log(\`Seeded \${products.length} products.\`);
 
-    // Seed product lengths
-    for (const len of productLengths) {
+    // Seed product variants
+    for (const variant of productVariants) {
       await connection.query(
-        'INSERT INTO product_lengths (id, product_id, length, price, stock) VALUES (?, ?, ?, ?, ?)',
-        [len.id, len.product_id, len.length, len.price, len.stock]
+        'INSERT INTO product_variants (id, product_id, length, price, stock, variant_type) VALUES (?, ?, ?, ?, ?, ?)',
+        [variant.id, variant.product_id, variant.length, variant.price, variant.stock, variant.variant_type]
       );
     }
-    console.log(\`Seeded \${productLengths.length} product lengths.\`);
+    console.log(\`Seeded \${productVariants.length} product variants.\`);
+
+    // Seed delivery zones
+    for (const zone of deliveryZones) {
+      await connection.query(
+        'INSERT INTO delivery_zones (id, name, price, is_active, created_at) VALUES (?, ?, ?, ?, ?)',
+        [zone.id, zone.name, zone.price, zone.is_active, zone.created_at]
+      );
+    }
+    console.log(\`Seeded \${deliveryZones.length} delivery zones.\`);
+
+    // Seed reviews
+    for (const review of reviews) {
+      await connection.query(
+        'INSERT INTO reviews (id, name, service, rating, content, is_approved, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [review.id, review.name, review.service, review.rating, review.content, review.is_approved, review.created_at]
+      );
+    }
+    console.log(\`Seeded \${reviews.length} reviews.\`);
 
     console.log('Seeding completed successfully!');
     connection.release();

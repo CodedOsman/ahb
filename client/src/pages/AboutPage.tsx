@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useSettings } from '@/hooks/useSettings';
 
 const AboutPage: React.FC = () => {
   const [photos, setPhotos] = useState<any[]>([]);
+  const { settings } = useSettings();
 
   useEffect(() => {
     axios.get('/api/client-photos')
@@ -40,13 +42,12 @@ const AboutPage: React.FC = () => {
           >
             <h1 
               className="text-6xl md:text-8xl font-bold text-primary mb-8 leading-tight font-display-lg tracking-tight uppercase"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{ fontFamily: "'Poppins', sans-serif" }}
             >
-              The Art of <br />
-              <span className="italic font-medium text-secondary">Sophistication</span>
+              {settings.about_hero_title || 'The Art of Sophistication'}
             </h1>
             <p className="text-secondary text-lg leading-relaxed mb-8 max-w-lg font-body-md">
-              Asantey Luxury Salon was born from a vision to blend cultural heritage with contemporary high-fashion aesthetics.
+              {settings.about_hero_subtitle || 'Asantey Luxury Salon was born from a vision to blend cultural heritage with contemporary high-fashion aesthetics.'}
             </p>
             <div className="w-20 h-[1px] bg-primary mb-8"></div>
           </motion.div>
@@ -72,19 +73,19 @@ const AboutPage: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center mb-32 border border-primary p-12 bg-surface-container-lowest">
           <h2 
             className="text-4xl md:text-5xl text-primary mb-8 font-headline-lg uppercase tracking-widest"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             About Us
           </h2>
           <div className="space-y-6 max-w-2xl mx-auto">
             <p className="text-secondary text-base leading-relaxed text-justify md:text-center font-body-md">
-              AHB Salon is a Nottingham-based hair and beauty brand dedicated to providing high-quality products and professional services. We specialise in supplying top-quality Cambodian hair extensions, known for their durability, fullness, and natural finish.
+              {settings.about_content_p1 || 'AHB Salon is a Nottingham-based hair and beauty brand dedicated to providing high-quality products and professional services. We specialise in supplying top-quality Cambodian hair extensions, known for their durability, fullness, and natural finish.'}
             </p>
             <p className="text-secondary text-base leading-relaxed text-justify md:text-center font-body-md">
-              Alongside our premium hair range, we offer a variety of expert services including braids, cornrows, and hair treatments designed to maintain and promote healthy hair. Our beauty services include lash extensions, eyebrow waxing, and threading, helping you achieve a complete, polished look.
+              {settings.about_content_p2 || 'Alongside our premium hair range, we offer a variety of expert services including braids, cornrows, and hair treatments designed to maintain and promote healthy hair. Our beauty services include lash extensions, eyebrow waxing, and threading, helping you achieve a complete, polished look.'}
             </p>
             <p className="text-secondary text-base leading-relaxed text-justify md:text-center font-body-md">
-              At AHB Salon, our focus is on delivering excellent service, enhancing natural beauty, and ensuring every client leaves feeling confident and satisfied.
+              {settings.about_content_p3 || 'At AHB Salon, our focus is on delivering excellent service, enhancing natural beauty, and ensuring every client leaves feeling confident and satisfied.'}
             </p>
           </div>
         </div>
@@ -94,12 +95,12 @@ const AboutPage: React.FC = () => {
           <div className="text-center mb-16">
             <h2 
               className="text-4xl md:text-5xl text-primary mb-4 uppercase tracking-widest font-headline-lg"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{ fontFamily: "'Poppins', sans-serif" }}
             >
-              Client Gallery
+              {settings.gallery_section_title || 'Client Gallery'}
             </h2>
             <p className="text-secondary text-base font-body-md max-w-lg mx-auto">
-              Real transformations, flawless installs, and professional styling crafted at Asantey Luxury Salon.
+              {settings.gallery_section_subtitle || 'Real transformations, flawless installs, and professional styling crafted at Asantey Luxury Salon.'}
             </p>
             <div className="w-16 h-[1px] bg-primary mx-auto mt-6"></div>
           </div>
@@ -138,7 +139,7 @@ const AboutPage: React.FC = () => {
           <div className="relative z-10 max-w-2xl mx-auto text-center">
             <h3 
               className="text-3xl font-bold text-primary mb-8 font-headline-md uppercase tracking-widest"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Contact & Location
             </h3>

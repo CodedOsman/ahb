@@ -42,11 +42,16 @@ async function startServer() {
       ? path.resolve(__dirname, "public")
       : path.resolve(__dirname, "..", "dist", "public");
 
+  // Redirect /cart to homepage (must be before static middleware)
+  app.get('/cart', (_req, res) => {
+    res.redirect(301, '/');
+  });
+
   app.use(express.static(staticPath));
 
   // Handle client-side routing - serve index.html for all routes
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(staticPath, "index.html"));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(staticPath, 'index.html'));
   });
 
   const port = process.env.PORT || 5000;

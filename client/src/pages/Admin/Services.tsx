@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Scissors } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Scissors, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Service {
@@ -21,6 +21,10 @@ const ServicesAdmin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
     category_id: 1,
@@ -141,6 +145,18 @@ const ServicesAdmin: React.FC = () => {
     }
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
+  const filteredServices = activeTab === 'all' 
+    ? services 
+    : services.filter(s => s.category_name === activeTab);
+
+  const totalPages = Math.max(1, Math.ceil(filteredServices.length / itemsPerPage));
+  const paginatedServices = filteredServices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="relative">
       <div className="flex justify-between items-center mb-8">
@@ -162,8 +178,38 @@ const ServicesAdmin: React.FC = () => {
       {loading ? (
         <div className="text-soft-slate italic">Loading services...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {services.map((service) => (
+        <>
+          {/* Category Tabs */}
+          {categories.length > 0 && (
+            <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+              <button
+                onClick={() => handleTabChange('all')}
+                className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold whitespace-nowrap transition-all border-b-2 ${
+                  activeTab === 'all'
+                    ? 'border-onyx text-onyx'
+                    : 'border-transparent text-warm-silver hover:text-onyx'
+                }`}
+              >
+                All Services
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleTabChange(cat.name)}
+                  className={`px-4 py-2 text-[10px] uppercase tracking-widest font-bold whitespace-nowrap transition-all border-b-2 ${
+                    activeTab === cat.name
+                      ? 'border-onyx text-onyx'
+                      : 'border-transparent text-warm-silver hover:text-onyx'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {paginatedServices.map((service) => (
             <div key={service.id} className="bg-silk-gray p-4 rounded-lg border border-silk-gray/10 flex gap-4 group hover:border-silk-gray/30 transition-all">
               <div className="w-20 h-20 bg-alabaster rounded flex items-center justify-center text-soft-slate/20 overflow-hidden flex-shrink-0">
                 {service.image_url ? (
@@ -201,8 +247,29 @@ const ServicesAdmin: React.FC = () => {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-8">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-xs font-bold text-soft-slate">Page {currentPage} of {totalPages}</span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal */}

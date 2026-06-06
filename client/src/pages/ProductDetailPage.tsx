@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 
 interface ProductVariant {
   id: number;
+  variant_type: string;
   length: string;
   price: string;
   stock: number;
@@ -19,13 +20,14 @@ interface ProductDetail {
   image_url: string;
   category_name: string;
   stock: number;
-  lengths: ProductVariant[];
+  variants: ProductVariant[];
 }
 
 const ProductDetailPage: React.FC = () => {
   const [, params] = useRoute('/product/:id');
   const [product, setProduct] = useState<ProductDetail | null>(null);
-  const [selectedLength, setSelectedLength] = useState<ProductVariant | null>(null);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
@@ -34,9 +36,18 @@ const ProductDetailPage: React.FC = () => {
       if (!params?.id) return;
       try {
         const res = await axios.get(`/api/products/${params.id}`);
-        setProduct(res.data);
-        if (res.data.lengths && res.data.lengths.length > 0) {
-          setSelectedLength(res.data.lengths[0]);
+        const data = res.data;
+        setProduct(data);
+        
+        if (data.variants && data.variants.length > 0) {
+          // Find unique variant types
+          const types = Array.from(new Set(data.variants.map((v: ProductVariant) => v.variant_type || '')));
+          const initialType = types[0] as string;
+          setSelectedType(initialType);
+          
+          // Find first available variant of that type
+          const firstVariant = data.variants.find((v: ProductVariant) => (v.variant_type || '') === initialType);
+          setSelectedVariant(firstVariant || null);
         }
       } catch (error) {
         console.error('Error fetching product details:', error);
@@ -65,16 +76,29 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const handleAddToCart = () => {
-    const price = selectedLength ? `£${selectedLength.price}` : `£${product.base_price}`;
-    const name = selectedLength ? `${product.name} - ${selectedLength.length}` : product.name;
+    const price = selectedVariant ? `£${selectedVariant.price}` : `£${product.base_price}`;
+    let nameStr = product.name;
+    if (selectedVariant) {
+      if (selectedVariant.variant_type && selectedVariant.length) {
+        nameStr += ` - ${selectedVariant.variant_type} (${selectedVariant.length})`;
+      } else if (selectedVariant.variant_type) {
+        nameStr += ` - ${selectedVariant.variant_type}`;
+      } else if (selectedVariant.length) {
+        nameStr += ` - ${selectedVariant.length}`;
+      }
+    }
     
     addToCart({
-      id: selectedLength ? `${product.id}-${selectedLength.id}` : product.id,
-      name,
+      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+      name: nameStr,
       price,
       category: product.category_name,
     });
   };
+
+  // Helper to get unique types and filtered lengths
+  const uniqueTypes = product?.variants ? Array.from(new Set(product.variants.map((v) => v.variant_type || ''))) : [];
+  const availableLengthsForType = product?.variants ? product.variants.filter((v) => (v.variant_type || '') === selectedType) : [];
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
@@ -106,13 +130,13 @@ const ProductDetailPage: React.FC = () => {
             </p>
             <h1 
               className="text-4xl md:text-6xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wide"
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               {product.name}
             </h1>
             
             <p className="text-3xl text-primary mb-8 font-bold font-body-md">
-              {selectedLength ? `£${selectedLength.price}` : `£${product.base_price}`}
+              {selectedVariant ? `£${selectedVariant.price}` : `£${product.base_price}`}
             </p>
 
             <div className="prose prose-invert mb-12">
@@ -121,41 +145,76 @@ const ProductDetailPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Length Selection */}
-            {product.lengths && product.lengths.length > 0 && (
-              <div className="mb-12">
-                <h4 className="text-xs uppercase tracking-widest text-primary mb-4 font-bold font-label-caps">
-                  Select Length
-                </h4>
-                <div className="flex flex-wrap gap-3">
-                  {product.lengths.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setSelectedLength(variant)}
-                      className={`px-6 py-3 border transition-all duration-300 text-xs font-label-caps rounded-none cursor-pointer ${
-                        selectedLength?.id === variant.id
-                          ? 'bg-primary text-on-primary border-primary font-bold'
-                          : 'border-primary/20 text-secondary hover:border-primary'
-                      } ${variant.stock <= 0 ? 'opacity-50 cursor-not-allowed line-through' : ''}`}
-                      disabled={variant.stock <= 0}
-                    >
-                      {variant.length} {variant.stock <= 0 && '(Out of Stock)'}
-                    </button>
-                  ))}
-                </div>
+            {/* Options Selection */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-12 space-y-8">
+                
+                {/* Variant Type Selection */}
+                {uniqueTypes.length > 1 || (uniqueTypes.length === 1 && uniqueTypes[0] !== '') ? (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-widest text-primary mb-4 font-bold font-label-caps">
+                      Select Type
+                    </h4>
+                    <div className="flex flex-wrap gap-3">
+                      {uniqueTypes.map((type, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSelectedType(type);
+                            // Auto-select first length for new type
+                            const newLengths = product.variants.filter((v) => (v.variant_type || '') === type);
+                            if (newLengths.length > 0) setSelectedVariant(newLengths[0]);
+                          }}
+                          className={`px-6 py-3 border transition-all duration-300 text-xs font-label-caps rounded-none cursor-pointer ${
+                            selectedType === type
+                              ? 'bg-primary text-on-primary border-primary font-bold'
+                              : 'border-primary/20 text-secondary hover:border-primary'
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Length Selection */}
+                {availableLengthsForType.length > 0 && availableLengthsForType.some(v => v.length) && (
+                  <div>
+                    <h4 className="text-xs uppercase tracking-widest text-primary mb-4 font-bold font-label-caps">
+                      Select Length
+                    </h4>
+                    <div className="flex flex-wrap gap-3">
+                      {availableLengthsForType.map((variant) => (
+                        <button
+                          key={variant.id}
+                          onClick={() => setSelectedVariant(variant)}
+                          className={`px-6 py-3 border transition-all duration-300 text-xs font-label-caps rounded-none cursor-pointer ${
+                            selectedVariant?.id === variant.id
+                              ? 'bg-primary text-on-primary border-primary font-bold'
+                              : 'border-primary/20 text-secondary hover:border-primary'
+                          } ${variant.stock <= 0 ? 'opacity-50 cursor-not-allowed line-through' : ''}`}
+                          disabled={variant.stock <= 0}
+                        >
+                          {variant.length} {variant.stock <= 0 && '(Out of Stock)'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             <button
               onClick={handleAddToCart}
-              disabled={(selectedLength ? selectedLength.stock : product.stock) <= 0}
+              disabled={(selectedVariant ? selectedVariant.stock : product.stock) <= 0}
               className={`w-full py-5 font-bold tracking-widest transition-all duration-300 font-label-caps text-label-caps rounded-none cursor-pointer ${
-                (selectedLength ? selectedLength.stock : product.stock) <= 0 
+                (selectedVariant ? selectedVariant.stock : product.stock) <= 0 
                   ? 'bg-background border border-error text-error cursor-not-allowed'
                   : 'bg-primary border border-primary text-on-primary hover:bg-background hover:text-primary'
               }`}
             >
-              {(selectedLength ? selectedLength.stock : product.stock) <= 0 ? 'OUT OF STOCK' : 'ADD TO SHOPPING BAG'}
+              {(selectedVariant ? selectedVariant.stock : product.stock) <= 0 ? 'OUT OF STOCK' : 'ADD TO SHOPPING BAG'}
             </button>
 
             {/* Additional Info */}

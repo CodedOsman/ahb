@@ -25,7 +25,7 @@ export const Navigation: React.FC = () => {
             <img 
               alt="ASANTEY LOGO" 
               className="h-12 w-auto object-contain cursor-pointer" 
-              src="/images/logo.webp"
+              src="/images/logo.png"
               onError={(e) => {
                 // Fallback to online logo if local image fails
                 (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
@@ -33,8 +33,9 @@ export const Navigation: React.FC = () => {
             />
           </Link>
           <nav className="hidden md:flex items-center gap-2">
+            <Link href="/" className={linkClass('/')}>HOME</Link>
             <Link href="/services" className={linkClass('/services')}>SERVICES</Link>
-            <Link href="/shop" className={linkClass('/shop')}>SHOP</Link>
+            <Link href="/shop" className={linkClass('/shop')}>SHOP COLLECTION</Link>
             <Link href="/about" className={linkClass('/about')}>ABOUT</Link>
           </nav>
         </div>
@@ -52,12 +53,14 @@ export const Navigation: React.FC = () => {
             )}
           </button>
           
-          <button 
-            className="block md:hidden material-symbols-outlined text-primary p-2 cursor-pointer"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? 'close' : 'menu'}
-          </button>
+          <div className="md:hidden flex items-center">
+            <button 
+              className="material-symbols-outlined text-primary p-2 cursor-pointer"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? 'close' : 'menu'}
+            </button>
+          </div>
         </div>
       </div>
 

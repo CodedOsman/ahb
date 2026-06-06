@@ -88,7 +88,7 @@
 
 /* Custom Tailwind v4 Utilities matching code.html custom styles */
 @utility font-label-caps {
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   text-transform: uppercase;
 }
 @utility text-label-caps {
@@ -98,7 +98,7 @@
   font-weight: 700;
 }
 @utility font-headline-lg-mobile {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400 !important;
 }
 @utility text-headline-lg-mobile {
@@ -107,7 +107,7 @@
   font-weight: 400;
 }
 @utility font-body-md {
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 @utility text-body-md {
   font-size: 16px;
@@ -115,7 +115,7 @@
   font-weight: 400;
 }
 @utility font-body-lg {
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 @utility text-body-lg {
   font-size: 18px;
@@ -123,7 +123,7 @@
   font-weight: 400;
 }
 @utility font-display-lg {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400 !important;
 }
 @utility text-display-lg {
@@ -133,7 +133,7 @@
   font-weight: 400;
 }
 @utility font-headline-md {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400 !important;
 }
 @utility text-headline-md {
@@ -142,13 +142,17 @@
   font-weight: 400;
 }
 @utility font-headline-lg {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Poppins', sans-serif;
   font-weight: 400 !important;
 }
 @utility text-headline-lg {
   font-size: 48px;
   line-height: 56px;
   font-weight: 400;
+}
+html,
+body {
+  font-family: 'Inter', sans-serif;
 }
 
 :root {

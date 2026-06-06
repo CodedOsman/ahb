@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, Scissors, ShoppingBag, Settings, LogOut, Menu, X, Camera } from 'lucide-react';
+import { LayoutDashboard, Scissors, ShoppingBag, Settings, LogOut, Menu, X, Camera, Star } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -21,10 +21,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
     { name: 'Orders', icon: ShoppingBag, path: '/admin/orders' },
+    { name: 'Categories', icon: LayoutDashboard, path: '/admin/categories' },
     { name: 'Services', icon: Scissors, path: '/admin/services' },
     { name: 'Products', icon: ShoppingBag, path: '/admin/products' },
     { name: 'Delivery Zones', icon: Settings, path: '/admin/delivery' },
     { name: 'Client Photos', icon: Camera, path: '/admin/photos' },
+    { name: 'Reviews', icon: Star, path: '/admin/reviews' },
     { name: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
 

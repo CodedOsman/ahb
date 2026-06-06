@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
             <img 
               alt="ASANTEY" 
               className="h-16 w-auto mb-8 cursor-pointer" 
-              src="/images/logo.webp"
+              src="/images/logo.png"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
               }}
@@ -69,9 +69,7 @@ export const Footer: React.FC = () => {
         <div>
           <h4 className="font-label-caps text-label-caps mb-8">COMPANY</h4>
           <ul className="flex flex-col gap-4 font-body-md text-body-md">
-            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">BLOG</a></li>
-            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CAREERS</a></li>
-            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">POLICIES</a></li>
+            <li><Link href="/policies" className="opacity-70 hover:opacity-100 hover:line-through transition-all">POLICIES</Link></li>
             <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CONTACT</a></li>
           </ul>
         </div>

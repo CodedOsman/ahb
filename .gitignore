@@ -99,7 +99,7 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
-
+scratch/
 # Database
 *.db
 *.sqlite

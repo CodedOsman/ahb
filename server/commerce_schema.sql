@@ -3,7 +3,7 @@ USE asantey_salon;
 -- Add stock columns to existing tables
 
 ALTER TABLE products ADD COLUMN stock INT NOT NULL DEFAULT 0;
-ALTER TABLE product_lengths ADD COLUMN stock INT NOT NULL DEFAULT 0;
+ALTER TABLE product_variants ADD COLUMN stock INT NOT NULL DEFAULT 0;
 
 -- Delivery Zones table
 CREATE TABLE IF NOT EXISTS delivery_zones (

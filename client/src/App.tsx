@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Route, Switch, useLocation } from 'wouter';
+import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { Toaster } from '@/components/UI/sonner';
 import { TooltipProvider } from '@/components/UI/tooltip';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -23,12 +23,15 @@ import AboutPage from './pages/AboutPage';
 import AdminLogin from './pages/Admin/Login';
 import AdminDashboard from './pages/Admin/Dashboard';
 import CheckoutSuccessPage from './pages/CheckoutSuccessPage';
+import PoliciesPage from './pages/PoliciesPage';
+import AdminCategories from './pages/Admin/Categories';
 import AdminServices from './pages/Admin/Services';
 import AdminProducts from './pages/Admin/Products';
 import AdminSettings from './pages/Admin/Settings';
 import AdminOrders from './pages/Admin/Orders';
 import AdminDeliveryZones from './pages/Admin/DeliveryZones';
 import AdminPhotos from './pages/Admin/Photos';
+import AdminReviews from './pages/Admin/Reviews';
 
 
 function App() {
@@ -56,12 +59,14 @@ function App() {
               ) : (
                 <AdminLayout>
                   <Route path="/admin/dashboard" component={AdminDashboard} />
+                  <Route path="/admin/categories" component={AdminCategories} />
                   <Route path="/admin/services" component={AdminServices} />
                   <Route path="/admin/products" component={AdminProducts} />
                   <Route path="/admin/settings" component={AdminSettings} />
                   <Route path="/admin/orders" component={AdminOrders} />
                   <Route path="/admin/delivery" component={AdminDeliveryZones} />
                   <Route path="/admin/photos" component={AdminPhotos} />
+                  <Route path="/admin/reviews" component={AdminReviews} />
                 </AdminLayout>
               )
             ) : (
@@ -70,11 +75,13 @@ function App() {
                   <Route path="/">
                     <Home isLoading={isLoading} />
                   </Route>
+                  <Route path="/cart"><Redirect to="/" /></Route>
                   <Route path="/shop" component={ShopPage} />
                   <Route path="/product/:id" component={ProductDetailPage} />
                   <Route path="/checkout/success" component={CheckoutSuccessPage} />
                   <Route path="/services" component={ServicesPage} />
                   <Route path="/about" component={AboutPage} />
+                  <Route path="/policies" component={PoliciesPage} />
                   <Route path="*" component={NotFound} />
                 </Switch>
               </ClientLayout>

@@ -37,11 +37,12 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
--- Product Lengths (Variants) table
-CREATE TABLE IF NOT EXISTS product_lengths (
+-- Product Variants table
+CREATE TABLE IF NOT EXISTS product_variants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
-    length VARCHAR(50) NOT NULL,
+    variant_type VARCHAR(100) NULL,
+    length VARCHAR(50) NULL,
     price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );

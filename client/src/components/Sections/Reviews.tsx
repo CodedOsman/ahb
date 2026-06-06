@@ -1,134 +1,226 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Review {
   id: number;
   name: string;
-  role: string;
+  service: string;
   content: string;
   rating: number;
-  date: string;
-  avatar: string;
+  created_at: string;
 }
 
-const reviewsData: Review[] = [
-  {
-    id: 1,
-    name: 'Jessica Taylor',
-    role: 'Cambodian Hair Install',
-    content: 'Absolutely obsessed with my raw Cambodian install! The hair is unbelievably full, soft, and has a gorgeous natural luster. The installation was seamless and the service was absolute luxury. 10/10 recommend!',
-    rating: 5,
-    date: '1 WEEK AGO',
-    avatar: 'JT'
-  },
-  {
-    id: 2,
-    name: 'Amara Okafor',
-    role: 'Knotless Braids & Styling',
-    content: 'Hands down the best knotless braids in Nottingham! The parting is so clean, the braids are lightweight, and there was zero tension. The salon atmosphere feels so warm, premium, and welcoming.',
-    rating: 5,
-    date: '3 WEEKS AGO',
-    avatar: 'AO'
-  },
-  {
-    id: 3,
-    name: 'Chloe Henderson',
-    role: 'Moisture Treatment & Silk Press',
-    content: 'Extremely professional team. Got a revitalizing hair treatment and silk press. My natural hair has never felt so healthy, bouncy, and soft. Asantey is truly a gem!',
-    rating: 5,
-    date: '1 MONTH AGO',
-    avatar: 'CH'
-  },
-  {
-    id: 4,
-    name: 'Elena Rostova',
-    role: 'Custom HD Closure Unit',
-    content: 'The HD closure unit is flawless. The lace is literally invisible, the bleach job is perfect, and it fits like a glove. I get non-stop compliments on this hair. Sarah is a true artist!',
-    rating: 5,
-    date: '2 MONTHS AGO',
-    avatar: 'ER'
-  }
-];
+const StarRating: React.FC<{ rating: number; interactive?: boolean; onRate?: (r: number) => void }> = ({ rating, interactive = false, onRate }) => {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          className={`material-symbols-outlined text-[14px] transition-colors ${
+            star <= (interactive ? hovered || rating : rating) ? 'text-primary' : 'text-primary/20'
+          } ${interactive ? 'cursor-pointer' : ''}`}
+          style={{ fontVariationSettings: "'FILL' 1" }}
+          onMouseEnter={() => interactive && setHovered(star)}
+          onMouseLeave={() => interactive && setHovered(0)}
+          onClick={() => interactive && onRate && onRate(star)}
+        >
+          star
+        </span>
+      ))}
+    </div>
+  );
+};
+
+function getRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'TODAY';
+  if (days < 7) return `${days} DAY${days > 1 ? 'S' : ''} AGO`;
+  if (days < 14) return '1 WEEK AGO';
+  if (days < 28) return `${Math.floor(days / 7)} WEEKS AGO`;
+  if (days < 60) return '1 MONTH AGO';
+  return `${Math.floor(days / 30)} MONTHS AGO`;
+}
 
 export const Reviews: React.FC = () => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: '', service: '', rating: 5, content: '' });
+
+  useEffect(() => {
+    axios.get('/api/reviews')
+      .then((res) => {
+        if (Array.isArray(res.data)) setReviews(res.data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.service.trim() || !form.content.trim()) {
+      toast.error('Please fill in all fields.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await axios.post('/api/reviews', form);
+      toast.success('Thank you! Your review has been submitted and will appear after approval.');
+      setForm({ name: '', service: '', rating: 5, content: '' });
+      setShowForm(false);
+    } catch {
+      toast.error('Failed to submit review. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-24 bg-surface border-t border-primary">
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-20">
           <span className="font-label-caps text-label-caps block mb-4">CLIENT VOICE</span>
-          <h2 className="font-headline-lg text-headline-lg uppercase">Google Reviews</h2>
+          <h2 className="font-headline-lg text-headline-lg uppercase">Reviews</h2>
           <div className="editorial-line w-24 mx-auto my-6"></div>
           <p className="font-body-md text-body-md max-w-2xl mx-auto text-on-surface-variant">
             Read what our clients say about their premium hair installations, custom units, and specialized beauty services.
           </p>
         </div>
 
-        {/* Reviews Editorial Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-primary bg-background">
-          {reviewsData.map((review, i) => (
-            <div 
-              key={review.id} 
-              className={`p-8 border-primary flex flex-col justify-between
-                ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''} 
-                ${i === 3 ? 'border-b md:border-b-0' : ''}
-              `}
-            >
-              <div>
-                {/* Stars and Date */}
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex gap-0.5">
-                    {[...Array(review.rating)].map((_, index) => (
-                      <span 
-                        key={index} 
-                        className="material-symbols-outlined text-[14px] text-primary"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        star
-                      </span>
-                    ))}
+        {/* Reviews Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-primary bg-background">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className={`p-8 border-primary flex flex-col justify-between ${i < 3 ? 'border-b md:border-b-0 md:border-r' : ''}`}>
+                <div className="animate-pulse space-y-4">
+                  <div className="h-3 bg-primary/10 rounded w-1/2" />
+                  <div className="space-y-2">
+                    <div className="h-2 bg-primary/10 rounded" />
+                    <div className="h-2 bg-primary/10 rounded w-5/6" />
+                    <div className="h-2 bg-primary/10 rounded w-4/6" />
                   </div>
-                  <span className="font-label-caps text-[10px] opacity-50 tracking-wider">
-                    {review.date}
-                  </span>
                 </div>
-
-                <p className="font-body-md text-body-md italic mb-6 text-on-surface-variant">
-                  "{review.content}"
-                </p>
               </div>
+            ))}
+          </div>
+        ) : reviews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-primary bg-background">
+            {reviews.slice(0, 4).map((review, i) => (
+              <div
+                key={review.id}
+                className={`p-8 border-primary flex flex-col justify-between
+                  ${i < Math.min(reviews.length - 1, 3) ? 'border-b md:border-b-0 md:border-r' : ''}
+                `}
+              >
+                <div>
+                  {/* Stars and Date */}
+                  <div className="flex justify-between items-center mb-6">
+                    <StarRating rating={review.rating} />
+                    <span className="font-label-caps text-[10px] opacity-50 tracking-wider">
+                      {getRelativeTime(review.created_at)}
+                    </span>
+                  </div>
+                  <p className="font-body-md text-body-md italic mb-6 text-on-surface-variant">
+                    "{review.content}"
+                  </p>
+                </div>
+                {/* Reviewer Details */}
+                <div className="flex items-center gap-3 pt-6 border-t border-primary/10">
+                  <div className="w-9 h-9 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
+                    {review.name.slice(0, 2)}
+                  </div>
+                  <div>
+                    <h4 className="font-label-caps text-label-caps text-[11px] text-primary">{review.name}</h4>
+                    <span className="text-[10px] opacity-60 uppercase tracking-widest block mt-0.5">{review.service}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="border border-primary p-16 text-center bg-background">
+            <p className="font-body-md text-on-surface-variant opacity-60">Be the first to leave a review!</p>
+          </div>
+        )}
 
-              {/* Reviewer Details */}
-              <div className="flex items-center gap-3 pt-6 border-t border-primary/10">
-                <div className="w-9 h-9 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
-                  {review.avatar}
+        {/* CTA */}
+        <div className="mt-12 text-center">
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="font-label-caps text-label-caps bg-surface-container-high text-primary px-8 py-4 flex items-center gap-2 mx-auto border border-primary hover:bg-primary hover:text-on-primary transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">rate_review</span>
+            {showForm ? 'CLOSE FORM' : 'LEAVE A REVIEW'}
+          </button>
+        </div>
+
+        {/* Review Submission Form */}
+        {showForm && (
+          <div className="mt-12 max-w-2xl mx-auto border border-primary p-8 bg-background">
+            <h3 className="font-headline-md text-headline-md uppercase tracking-widest mb-8 text-center">Share Your Experience</h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="font-label-caps text-[10px] tracking-widest uppercase mb-2 block text-on-surface-variant">Your Name *</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+                    className="w-full bg-surface-container border border-primary/20 p-3 text-sm outline-none focus:border-primary transition-all"
+                    placeholder="Jane Smith"
+                    required
+                  />
                 </div>
                 <div>
-                  <h4 className="font-label-caps text-label-caps text-[11px] text-primary">
-                    {review.name}
-                  </h4>
-                  <span className="text-[10px] opacity-60 uppercase tracking-widest block mt-0.5">
-                    {review.role}
-                  </span>
+                  <label className="font-label-caps text-[10px] tracking-widest uppercase mb-2 block text-on-surface-variant">Service Received *</label>
+                  <input
+                    type="text"
+                    value={form.service}
+                    onChange={(e) => setForm(f => ({ ...f, service: e.target.value }))}
+                    className="w-full bg-surface-container border border-primary/20 p-3 text-sm outline-none focus:border-primary transition-all"
+                    placeholder="Knotless Braids"
+                    required
+                  />
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Call To Action */}
-        <div className="mt-12 text-center">
-          <a 
-            href="https://g.page/r/YOUR_GOOGLE_BUSINESS_ID/review" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-block"
-          >
-            <button className="font-label-caps text-label-caps bg-surface-container-high text-primary px-8 py-4 flex items-center gap-2 mx-auto border border-primary hover:bg-primary hover:text-on-primary transition-all cursor-pointer">
-              <span className="material-symbols-outlined text-[18px]">rate_review</span>
-              WRITE A REVIEW ON GOOGLE
-            </button>
-          </a>
-        </div>
+              <div>
+                <label className="font-label-caps text-[10px] tracking-widest uppercase mb-2 block text-on-surface-variant">Rating *</label>
+                <StarRating rating={form.rating} interactive onRate={(r) => setForm(f => ({ ...f, rating: r }))} />
+              </div>
+              <div>
+                <label className="font-label-caps text-[10px] tracking-widest uppercase mb-2 block text-on-surface-variant">Your Review *</label>
+                <textarea
+                  value={form.content}
+                  onChange={(e) => setForm(f => ({ ...f, content: e.target.value }))}
+                  className="w-full bg-surface-container border border-primary/20 p-3 text-sm outline-none focus:border-primary transition-all h-32 resize-none"
+                  placeholder="Tell us about your experience..."
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="font-label-caps text-label-caps border border-primary/30 px-6 py-3 hover:border-primary transition-all cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="font-label-caps text-label-caps bg-primary text-on-primary px-8 py-3 hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {submitting ? 'SUBMITTING...' : 'SUBMIT REVIEW'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </section>
   );

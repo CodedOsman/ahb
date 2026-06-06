@@ -42,6 +42,57 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Manage Categories
+router.get('/categories', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM categories ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/categories', authenticateToken, async (req, res) => {
+  const { name, slug, type } = req.body;
+  try {
+    const [result]: any = await pool.query(
+      'INSERT INTO categories (name, slug, type) VALUES (?, ?, ?)',
+      [name, slug, type]
+    );
+    res.json({ id: result.insertId, message: 'Category created' });
+  } catch (error: any) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Category slug already exists' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/categories/:id', authenticateToken, async (req, res) => {
+  const { name, slug, type } = req.body;
+  try {
+    await pool.query(
+      'UPDATE categories SET name = ?, slug = ?, type = ? WHERE id = ?',
+      [name, slug, type, req.params.id]
+    );
+    res.json({ message: 'Category updated' });
+  } catch (error: any) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Category slug already exists' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/categories/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM categories WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Category deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Manage Services
 router.get('/services', authenticateToken, async (req, res) => {
   try {
@@ -98,9 +149,9 @@ router.delete('/services/:id', authenticateToken, async (req, res) => {
 
 // Manage Products
 router.post('/products', authenticateToken, async (req, res) => {
-  const { category_id, name, description, base_price, image_url, is_active, lengths, stock } = req.body;
-  const totalStock = Array.isArray(lengths) && lengths.length
-    ? lengths.reduce((sum: number, len: any) => sum + (Number(len.stock) || 0), 0)
+  const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  const totalStock = Array.isArray(variants) && variants.length
+    ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
     : (stock || 0);
   const connection = await pool.getConnection();
   try {
@@ -113,11 +164,11 @@ router.post('/products', authenticateToken, async (req, res) => {
 
     const productId = result.insertId;
 
-    if (lengths && Array.isArray(lengths)) {
-      for (const len of lengths) {
+    if (variants && Array.isArray(variants)) {
+      for (const v of variants) {
         await connection.query(
-          'INSERT INTO product_lengths (product_id, length, price, stock) VALUES (?, ?, ?, ?)',
-          [productId, len.length, len.price, len.stock || 0]
+          'INSERT INTO product_variants (product_id, variant_type, length, price, stock) VALUES (?, ?, ?, ?, ?)',
+          [productId, v.variant_type || '', v.length || '', v.price, v.stock || 0]
         );
       }
     }
@@ -139,9 +190,9 @@ router.post('/products', authenticateToken, async (req, res) => {
 });
 
 router.put('/products/:id', authenticateToken, async (req, res) => {
-  const { category_id, name, description, base_price, image_url, is_active, lengths, stock } = req.body;
-  const totalStock = Array.isArray(lengths) && lengths.length
-    ? lengths.reduce((sum: number, len: any) => sum + (Number(len.stock) || 0), 0)
+  const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  const totalStock = Array.isArray(variants) && variants.length
+    ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
     : (stock || 0);
   const connection = await pool.getConnection();
   try {
@@ -152,14 +203,14 @@ router.put('/products/:id', authenticateToken, async (req, res) => {
       [category_id, name, description, base_price, image_url, is_active, totalStock, req.params.id]
     );
 
-    // Update lengths: Delete and re-insert for simplicity or match IDs
-    await connection.query('DELETE FROM product_lengths WHERE product_id = ?', [req.params.id]);
+    // Update variants: Delete and re-insert for simplicity or match IDs
+    await connection.query('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
     
-    if (lengths && Array.isArray(lengths)) {
-      for (const len of lengths) {
+    if (variants && Array.isArray(variants)) {
+      for (const v of variants) {
         await connection.query(
-          'INSERT INTO product_lengths (product_id, length, price, stock) VALUES (?, ?, ?, ?)',
-          [req.params.id, len.length, len.price, len.stock || 0]
+          'INSERT INTO product_variants (product_id, variant_type, length, price, stock) VALUES (?, ?, ?, ?, ?)',
+          [req.params.id, v.variant_type || '', v.length || '', v.price, v.stock || 0]
         );
       }
     }
@@ -188,19 +239,19 @@ router.get('/products', authenticateToken, async (req, res) => {
       ORDER BY p.created_at DESC
     `);
 
-    const [lengths]: any = await pool.query('SELECT * FROM product_lengths');
+    const [variants]: any = await pool.query('SELECT * FROM product_variants');
 
-    const productsWithLengths = products.map((p: any) => {
-      const productLengths = lengths.filter((l: any) => l.product_id === p.id);
-      const variantStock = productLengths.reduce((sum: number, l: any) => sum + (Number(l.stock) || 0), 0);
+    const productsWithVariants = products.map((p: any) => {
+      const productVariants = variants.filter((v: any) => v.product_id === p.id);
+      const variantStock = productVariants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0);
       return {
         ...p,
-        stock: productLengths.length ? variantStock : p.stock,
-        lengths: productLengths,
+        stock: productVariants.length ? variantStock : p.stock,
+        variants: productVariants,
       };
     });
 
-    res.json(productsWithLengths);
+    res.json(productsWithVariants);
   } catch (error) {
     console.error('Error fetching admin products:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -346,6 +397,34 @@ router.delete('/client-photos/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Client photo deleted' });
   } catch (error) {
     console.error('Error deleting client photo:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Manage Reviews
+router.get('/reviews', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM reviews ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/reviews/:id/approve', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('UPDATE reviews SET is_approved = 1 WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Review approved' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/reviews/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM reviews WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Review deleted' });
+  } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });

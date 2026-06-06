@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Order {
   id: number;
@@ -19,6 +19,8 @@ interface Order {
 const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchOrders();
@@ -63,6 +65,9 @@ const OrdersPage: React.FC = () => {
 
   if (loading) return <div className="text-soft-slate p-8">Loading orders...</div>;
 
+  const totalPages = Math.max(1, Math.ceil(orders.length / itemsPerPage));
+  const paginatedOrders = orders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div>
       <div className="mb-8">
@@ -86,12 +91,12 @@ const OrdersPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 ? (
+              {paginatedOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-warm-silver italic">No orders found.</td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr key={order.id} className="border-b border-silk-gray/5 hover:bg-white/5 transition-colors">
                     <td className="p-4 text-sm text-onyx">#{order.id}</td>
                     <td className="p-4">
@@ -148,6 +153,26 @@ const OrdersPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8">
+          <button 
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <span className="text-xs font-bold text-soft-slate">Page {currentPage} of {totalPages}</span>
+          <button 
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

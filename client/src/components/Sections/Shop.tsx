@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import axios from 'axios';
 import { Link } from 'wouter';
+import { useSettings } from '@/hooks/useSettings';
 
 interface Product {
   id: number;
@@ -85,40 +86,107 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  type: string;
+}
+
+interface CategoryCardProps {
+  category: Category;
+  onClick: (slug: string) => void;
+}
+
+const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
+  // Use stylized text-based cards for categories since they don't have images in DB
+  return (
+    <div 
+      onClick={() => onClick(category.slug)}
+      className="group cursor-pointer block border border-white/20 bg-surface-container-highest hover:bg-white transition-all duration-500 overflow-hidden relative aspect-[4/3] flex flex-col justify-center items-center text-center p-6"
+    >
+      <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-all duration-500 z-0"></div>
+      <div className="z-10 text-white group-hover:text-black transition-colors duration-500">
+        <span className="font-label-caps text-[10px] tracking-widest uppercase opacity-70 mb-2 block">
+          Collection
+        </span>
+        <h3 className="font-headline-md text-2xl uppercase tracking-wider">
+          {category.name}
+        </h3>
+      </div>
+      <div className="absolute bottom-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-black font-label-caps text-xs tracking-widest uppercase">
+        Explore
+      </div>
+    </div>
+  );
+};
+
 export const Shop: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'CATEGORIES' | 'PRODUCTS'>('CATEGORIES');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { settings } = useSettings();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await axios.get('/api/products');
-        // Take first 4 products to fit in 4-column layout like code.html
-        setProducts(res.data.slice(0, 4));
+        const catRes = await axios.get('/api/categories');
+        setCategories(catRes.data.filter((c: Category) => c.type === 'product'));
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching categories:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchInitialData();
   }, []);
 
+  const handleCategoryClick = async (slug: string) => {
+    setSelectedCategory(slug);
+    setView('PRODUCTS');
+    setLoading(true);
+    try {
+      const res = await axios.get(`/api/products?category=${slug}`);
+      setProducts(res.data.slice(0, 4)); // Show top 4 products
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBackToCategories = () => {
+    setView('CATEGORIES');
+    setSelectedCategory(null);
+  };
+
   return (
-    <section id="shop" className="bg-primary text-on-primary py-24">
+    <section id="shop" className="bg-primary text-on-primary py-24 min-h-[600px]">
       <div className="max-w-container-max mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div>
             <span className="font-label-caps text-label-caps border-b border-on-primary pb-2 opacity-60">
-              CURATED COLLECTION
+              {settings.shop_section_label || 'CURATED COLLECTION'}
             </span>
             <h2 className="font-headline-lg text-headline-lg mt-4 text-white uppercase">
-              Asantey Shop
+              {settings.shop_section_title || 'Asantey Shop'}
             </h2>
             <p className="font-body-md text-body-md mt-4 max-w-md opacity-70 text-white">
-              Curated luxury hair care products and styling tools to maintain your beautiful look at home.
+              {view === 'CATEGORIES'
+                ? (settings.shop_section_subtitle_categories || 'Explore our curated collections of luxury hair care products and styling tools.')
+                : (settings.shop_section_subtitle_products || 'Browse our premium products to maintain your beautiful look at home.')}
             </p>
           </div>
+          {view === 'PRODUCTS' && (
+            <button 
+              onClick={handleBackToCategories}
+              className="font-label-caps text-label-caps border border-white/40 text-white px-8 py-3 hover:bg-white hover:text-black transition-all cursor-pointer whitespace-nowrap"
+            >
+              ← BACK TO CATEGORIES
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -126,17 +194,33 @@ export const Shop: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            {view === 'CATEGORIES' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                {categories.map((cat) => (
+                  <CategoryCard key={cat.id} category={cat} onClick={handleCategoryClick} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                {products.length > 0 ? (
+                  products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                ) : (
+                  <div className="col-span-4 text-center py-12 text-white/70">
+                    No products found in this category.
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         <div className="mt-16 text-center">
-          <Link href="/shop">
+          <Link href={view === 'PRODUCTS' && selectedCategory ? `/shop?category=${selectedCategory}` : "/shop"}>
             <button className="font-label-caps text-label-caps border border-white text-white px-12 py-4 hover:bg-white hover:text-black transition-all cursor-pointer">
-              VIEW ALL PRODUCTS
+              {view === 'PRODUCTS' && selectedCategory ? 'VIEW ALL IN CATEGORY' : 'VIEW ALL PRODUCTS'}
             </button>
           </Link>
         </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Edit2, Trash2, X, Save, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Product {
@@ -13,7 +13,7 @@ interface Product {
   is_active: boolean;
   category_name: string;
   stock: number;
-  lengths?: any[];
+  variants?: any[];
 }
 
 const ProductsAdmin: React.FC = () => {
@@ -22,6 +22,9 @@ const ProductsAdmin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
     category_id: 1,
@@ -31,13 +34,13 @@ const ProductsAdmin: React.FC = () => {
     image_url: '',
     is_active: true,
     stock: 0,
-    lengths: [] as { length: string, price: string, stock: number }[]
+    variants: [] as { variant_type: string, length: string, price: string, stock: number }[]
   });
 
   const [parsingImage, setParsingImage] = useState(false);
 
-  const calculateTotalStock = (lengths: { length: string; price: string; stock: number }[]) => {
-    return lengths.reduce((sum, length) => sum + (Number(length.stock) || 0), 0);
+  const calculateTotalStock = (variants: { variant_type: string, length: string; price: string; stock: number }[]) => {
+    return variants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
   };
 
   const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +79,9 @@ const ProductsAdmin: React.FC = () => {
       setProducts(productsRes.data);
 
       const productCategories = categoriesRes.data.filter((c: any) => String(c.type).toLowerCase() === 'product');
-      setCategories(productCategories.length ? productCategories : categoriesRes.data);
+      const cats = productCategories.length ? productCategories : categoriesRes.data;
+      setCategories(cats);
+      setActiveCategoryId(prev => prev || (cats.length > 0 ? cats[0].id : null));
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -86,11 +91,10 @@ const ProductsAdmin: React.FC = () => {
 
   const handleOpenModal = async (product: Product | null = null) => {
     if (product) {
-      // Fetch details to get lengths
       try {
         const res = await axios.get(`/api/products/${product.id}`);
         const fullProduct = res.data;
-        const lengths = fullProduct.lengths || [];
+        const variants = fullProduct.variants || [];
         setEditingProduct(fullProduct);
         setFormData({
           category_id: fullProduct.category_id,
@@ -99,8 +103,8 @@ const ProductsAdmin: React.FC = () => {
           base_price: fullProduct.base_price,
           image_url: fullProduct.image_url,
           is_active: !!fullProduct.is_active,
-          stock: lengths.length ? calculateTotalStock(lengths) : fullProduct.stock || 0,
-          lengths,
+          stock: variants.length ? calculateTotalStock(variants) : fullProduct.stock || 0,
+          variants,
         });
       } catch (err) {
         toast.error('Failed to fetch product details');
@@ -116,7 +120,7 @@ const ProductsAdmin: React.FC = () => {
         image_url: '',
         is_active: true,
         stock: 0,
-        lengths: []
+        variants: []
       });
     }
     setIsModalOpen(true);
@@ -127,7 +131,7 @@ const ProductsAdmin: React.FC = () => {
     const token = localStorage.getItem('admin_token');
     const payload = {
       ...formData,
-      stock: formData.lengths.length ? calculateTotalStock(formData.lengths) : formData.stock,
+      stock: formData.variants.length ? calculateTotalStock(formData.variants) : formData.stock,
     };
 
     try {
@@ -163,34 +167,41 @@ const ProductsAdmin: React.FC = () => {
     }
   };
 
-  const addLength = () => {
-    const newLengths = [...formData.lengths, { length: '', price: '', stock: 0 }];
+  const addVariant = () => {
+    const newVariants = [...formData.variants, { variant_type: '', length: '', price: '', stock: 0 }];
     setFormData({
       ...formData,
-      lengths: newLengths,
-      stock: calculateTotalStock(newLengths),
+      variants: newVariants,
+      stock: calculateTotalStock(newVariants),
     });
   };
 
-  const removeLength = (index: number) => {
-    const newLengths = [...formData.lengths];
-    newLengths.splice(index, 1);
+  const removeVariant = (index: number) => {
+    const newVariants = [...formData.variants];
+    newVariants.splice(index, 1);
     setFormData({
       ...formData,
-      lengths: newLengths,
-      stock: calculateTotalStock(newLengths),
+      variants: newVariants,
+      stock: calculateTotalStock(newVariants),
     });
   };
 
-  const updateLength = (index: number, field: string, value: string) => {
-    const newLengths = [...formData.lengths];
-    (newLengths[index] as any)[field] = value;
+  const updateVariant = (index: number, field: string, value: string) => {
+    const newVariants = [...formData.variants];
+    (newVariants[index] as any)[field] = value;
     setFormData({
       ...formData,
-      lengths: newLengths,
-      stock: calculateTotalStock(newLengths),
+      variants: newVariants,
+      stock: calculateTotalStock(newVariants),
     });
   };
+
+  const filteredProducts = activeCategoryId 
+    ? products.filter(p => p.category_id === activeCategoryId)
+    : products;
+  
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div>
@@ -213,8 +224,21 @@ const ProductsAdmin: React.FC = () => {
       {loading ? (
         <div className="text-soft-slate italic">Loading products...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {products.map((product) => (
+        <>
+          <div className="flex gap-6 mb-6 border-b border-silk-gray/10 pb-2 overflow-x-auto hide-scrollbar">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => { setActiveCategoryId(cat.id); setCurrentPage(1); }}
+                className={`pb-2 whitespace-nowrap text-xs font-bold tracking-widest uppercase transition-colors ${activeCategoryId === cat.id ? 'text-onyx border-b-2 border-onyx' : 'text-warm-silver hover:text-soft-slate'}`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {paginatedProducts.map((product) => (
             <div key={product.id} className="bg-silk-gray p-4 rounded-lg border border-silk-gray/10 flex gap-4 group hover:border-silk-gray/30 transition-all">
               <div className="w-20 h-20 bg-alabaster rounded flex items-center justify-center text-soft-slate/20 overflow-hidden">
                 {product.image_url ? <img src={product.image_url} className="w-full h-full object-cover" /> : <Package size={32} />}
@@ -246,6 +270,27 @@ const ProductsAdmin: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-xs font-bold text-soft-slate">Page {currentPage} of {totalPages}</span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 border border-silk-gray/20 rounded hover:bg-silk-gray disabled:opacity-50 disabled:cursor-not-allowed transition-all text-onyx"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       {/* Modal */}
@@ -375,33 +420,44 @@ const ProductsAdmin: React.FC = () => {
               {/* Variants Section */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-silk-gray/10 pb-2">
-                  <h3 className="text-xs uppercase tracking-widest text-soft-slate font-bold">Length Variants</h3>
+                  <h3 className="text-xs uppercase tracking-widest text-soft-slate font-bold">Product Variants</h3>
                   <button 
                     type="button" 
-                    onClick={addLength}
+                    onClick={addVariant}
                     className="text-[10px] uppercase tracking-widest text-soft-slate hover:underline font-bold"
                   >
-                    + Add Length
+                    + Add Variant
                   </button>
                 </div>
                 
-                {formData.lengths.map((len, idx) => (
-                  <div key={idx} className="flex gap-4 items-end">
+                {formData.variants.map((v, idx) => (
+                  <div key={idx} className="flex gap-4 items-end bg-black/5 p-4 rounded border border-silk-gray/10">
+                    <div className="flex-1">
+                      <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Variant (e.g. Wavy)</label>
+                      <input 
+                        type="text" 
+                        value={v.variant_type}
+                        onChange={(e) => updateVariant(idx, 'variant_type', e.target.value)}
+                        className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
+                        placeholder="Optional"
+                      />
+                    </div>
                     <div className="flex-1">
                       <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Length (e.g. 18")</label>
                       <input 
                         type="text" 
-                        value={len.length}
-                        onChange={(e) => updateLength(idx, 'length', e.target.value)}
+                        value={v.length}
+                        onChange={(e) => updateVariant(idx, 'length', e.target.value)}
                         className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
+                        placeholder="Optional"
                       />
                     </div>
                     <div className="flex-1">
                       <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Price (£)</label>
                       <input 
                         type="number" 
-                        value={len.price}
-                        onChange={(e) => updateLength(idx, 'price', e.target.value)}
+                        value={v.price}
+                        onChange={(e) => updateVariant(idx, 'price', e.target.value)}
                         className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
                       />
                     </div>
@@ -409,14 +465,14 @@ const ProductsAdmin: React.FC = () => {
                       <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Stock</label>
                       <input 
                         type="number" 
-                        value={len.stock}
-                        onChange={(e) => updateLength(idx, 'stock', e.target.value)}
+                        value={v.stock}
+                        onChange={(e) => updateVariant(idx, 'stock', e.target.value)}
                         className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
                       />
                     </div>
                     <button 
                       type="button" 
-                      onClick={() => removeLength(idx)}
+                      onClick={() => removeVariant(idx)}
                       className="p-2 text-red-400 hover:text-red-300"
                     >
                       <Trash2 size={16} />

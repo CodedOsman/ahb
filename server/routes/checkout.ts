@@ -143,42 +143,124 @@ router.post('/webhook', async (req, res) => {
         ['paid', customerEmail, customerName, shippingAddressStr, sessionId]
       );
 
-      // Fetch the order items to reduce stock
-      const [orderRows]: any = await pool.query('SELECT id FROM orders WHERE stripe_session_id = ?', [sessionId]);
+      // Fetch the order items to reduce stock and build email summary
+      const [orderRows]: any = await pool.query('SELECT id, subtotal, delivery_fee FROM orders WHERE stripe_session_id = ?', [sessionId]);
       if (orderRows.length > 0) {
         const orderId = orderRows[0].id;
-        const [items]: any = await pool.query('SELECT product_id, quantity FROM order_items WHERE order_id = ?', [orderId]);
+        const subtotal = parseFloat(orderRows[0].subtotal);
+        const deliveryFee = parseFloat(orderRows[0].delivery_fee);
+        const [items]: any = await pool.query('SELECT product_id, product_name, price, quantity FROM order_items WHERE order_id = ?', [orderId]);
         
+        let itemsHtml = '<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">';
         for (const item of items) {
+            let baseProductId = item.product_id;
+            if (baseProductId.includes('-')) {
+                baseProductId = baseProductId.split('-')[0];
+            }
+            const [catRows]: any = await pool.query('SELECT c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = ?', [baseProductId]);
+            const categoryName = catRows.length > 0 ? catRows[0].category_name : 'Product';
+
+            itemsHtml += `
+                <tr>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eaeaea;">
+                        <strong style="color: #000000;">${item.product_name}</strong> <span style="color: #999999; font-size: 12px; margin-left: 5px;">(${categoryName})</span><br/>
+                        <span style="color: #666666; font-size: 12px;">Qty: ${item.quantity} | Price: £${parseFloat(item.price).toFixed(2)}</span>
+                    </td>
+                    <td style="padding: 10px 0; border-bottom: 1px solid #eaeaea; text-align: right; color: #000000;">
+                        £${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    </td>
+                </tr>
+            `;
+
             const pId = item.product_id; // could be '1' or '1-2'
             if (pId.includes('-')) {
                 // It's a length variant: id-lengthId
                 const [prodId, lengthId] = pId.split('-');
-                await pool.query('UPDATE product_lengths SET stock = GREATEST(stock - ?, 0) WHERE id = ?', [item.quantity, lengthId]);
+                await pool.query('UPDATE product_variants SET stock = GREATEST(stock - ?, 0) WHERE id = ?', [item.quantity, lengthId]);
             } else {
                 // Base product
                 await pool.query('UPDATE products SET stock = GREATEST(stock - ?, 0) WHERE id = ?', [item.quantity, pId]);
             }
         }
-      }
-
-      // Send confirmation email
-      if (customerEmail && process.env.SMTP_USER) {
-        await transporter.sendMail({
-          from: `"Asantey Salon" <${process.env.SMTP_USER}>`,
-          to: customerEmail,
-          subject: 'Order Confirmation - Asantey Luxury Salon',
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #2D2D2D;">Thank you for your order!</h1>
-                <p>Hi ${customerName},</p>
-                <p>We've received your order and payment. We'll notify you once it ships.</p>
-                <p><strong>Order Total:</strong> £${(session.amount_total! / 100).toFixed(2)}</p>
-                <br/>
-                <p>Best regards,<br/>Asantey Luxury Salon Team</p>
+        itemsHtml += `
+                <tr>
+                    <td style="padding: 10px 0; border-top: 2px solid #000000; text-align: right;">
+                        <strong style="color: #666666; font-size: 14px;">Subtotal:</strong>
+                    </td>
+                    <td style="padding: 10px 0; border-top: 2px solid #000000; text-align: right; color: #000000;">
+                        £${subtotal.toFixed(2)}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; text-align: right;">
+                        <strong style="color: #666666; font-size: 14px;">Delivery Fee:</strong>
+                    </td>
+                    <td style="padding: 5px 0; text-align: right; color: #000000;">
+                        £${deliveryFee.toFixed(2)}
+                    </td>
+                </tr>
+            </table>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eaeaea; font-size: 14px; color: #666666;">
+                <strong style="color: #000000;">Shipping Address:</strong><br/>
+                ${shippingAddressStr}
             </div>
-          `
-        });
+        `;
+
+        // Send confirmation email to customer
+        if (customerEmail && process.env.SMTP_USER) {
+          await transporter.sendMail({
+            from: `"Asantey Hair & Beauty Salon" <${process.env.SMTP_USER}>`,
+            to: customerEmail,
+            subject: 'Order Confirmation - Asantey Hair & Beauty Salon',
+            html: `
+              <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border: 1px solid #eaeaea;">
+                  <div style="text-align: center; margin-bottom: 30px;">
+                      <h1 style="color: #000000; font-size: 24px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin: 0;">Asantey Hair &amp; Beauty Salon</h1>
+                      <div style="height: 1px; background-color: #000000; width: 50px; margin: 20px auto;"></div>
+                  </div>
+                  <div style="color: #333333; font-size: 14px; line-height: 1.6;">
+                      <p style="font-size: 16px; font-weight: 400; color: #000000;">Dear ${customerName},</p>
+                      <p>Thank you for choosing Asantey Hair &amp; Beauty Salon. We are delighted to confirm that your order and payment have been successfully received.</p>
+                      <div style="background-color: #f9f9f9; padding: 20px; margin: 30px 0; border-left: 3px solid #000000;">
+                          <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #666666;">Order Summary</p>
+                          ${itemsHtml}
+                          <p style="margin: 20px 0 0 0; font-size: 18px; color: #000000; text-align: right;"><strong>Total: £${(session.amount_total! / 100).toFixed(2)}</strong></p>
+                      </div>
+                      <p>We will notify you as soon as your order ships. If you have any questions, please reply directly to this email.</p>
+                      <p style="margin-top: 40px; color: #666666;">Warm regards,<br/><strong style="color: #000000;">The Asantey Hair &amp; Beauty Salon Team</strong></p>
+                  </div>
+              </div>
+            `
+          });
+        }
+
+        // Send notification to admin
+        const [settingsRows]: any = await pool.query('SELECT value FROM site_settings WHERE `key` = "admin_notification_email"');
+        let adminEmail = null;
+        if (settingsRows.length > 0 && settingsRows[0].value) {
+          adminEmail = settingsRows[0].value;
+        }
+
+        if (adminEmail && process.env.SMTP_USER) {
+          await transporter.sendMail({
+            from: `"Asantey System" <${process.env.SMTP_USER}>`,
+            to: adminEmail,
+            subject: `New Order Received - ${customerName}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border: 1px solid #eaeaea;">
+                  <h2 style="color: #000000; margin-top: 0;">New Order Alert</h2>
+                  <p>A new order has been placed successfully.</p>
+                  <div style="background-color: #ffffff; padding: 15px; border-left: 4px solid #000000; margin-top: 20px;">
+                      <p><strong>Customer:</strong> ${customerName} (${customerEmail})</p>
+                      <p><strong>Order Summary:</strong></p>
+                      ${itemsHtml}
+                  </div>
+                  <p style="margin-top: 20px;">Log in to the admin dashboard for full details.</p>
+              </div>
+            `
+          }).catch(err => console.error("Failed to send admin order notification:", err));
+        }
       }
     } catch (dbErr) {
       console.error('Error processing successful checkout in DB:', dbErr);

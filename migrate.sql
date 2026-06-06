@@ -40,11 +40,12 @@ CREATE TABLE IF NOT EXISTS products (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );
 
--- Product Lengths (Variants) table
-CREATE TABLE IF NOT EXISTS product_lengths (
+-- Product Variants table
+CREATE TABLE IF NOT EXISTS product_variants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
-    length VARCHAR(50) NOT NULL,
+    variant_type VARCHAR(100) NULL DEFAULT "",
+    length VARCHAR(50) NULL DEFAULT "",
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL DEFAULT 0,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
@@ -74,6 +75,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
     `value` TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+INSERT IGNORE INTO site_settings (`key`, `value`) VALUES ('admin_notification_email', '');
 
 -- Delivery Zones table
 CREATE TABLE IF NOT EXISTS delivery_zones (
@@ -109,4 +112,15 @@ CREATE TABLE IF NOT EXISTS order_items (
     price DECIMAL(10, 2) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+-- Reviews table (user-submitted, admin-approved)
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    service VARCHAR(255) NOT NULL,
+    rating TINYINT NOT NULL DEFAULT 5,
+    content TEXT NOT NULL,
+    is_approved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

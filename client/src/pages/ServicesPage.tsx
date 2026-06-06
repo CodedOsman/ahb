@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useSettings } from '@/hooks/useSettings';
 
 interface Service {
   id: number;
@@ -14,6 +15,7 @@ interface Service {
 const ServicesPage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const { settings } = useSettings();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -36,12 +38,12 @@ const ServicesPage: React.FC = () => {
         <div className="mb-16 text-center">
           <h1 
             className="text-5xl md:text-8xl font-bold text-primary mb-6 font-display-lg uppercase tracking-wider"
-            style={{ fontFamily: "'Playfair Display', serif" }}
+            style={{ fontFamily: "'Poppins', sans-serif" }}
           >
-            Our Services
+            {settings.services_page_title || 'Our Services'}
           </h1>
           <p className="text-secondary max-w-2xl mx-auto text-base font-body-md leading-relaxed">
-            From intricate braiding to premium color treatments, discover our full range of luxury hair and beauty services.
+            {settings.services_page_subtitle || 'From intricate braiding to premium color treatments, discover our full range of luxury hair and beauty services.'}
           </p>
         </div>
 
@@ -68,7 +70,7 @@ const ServicesPage: React.FC = () => {
                       <img 
                         src={service.image_url} 
                         alt={service.title} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary/10 text-4xl font-black font-display-lg uppercase">
@@ -81,7 +83,7 @@ const ServicesPage: React.FC = () => {
                   <div className="md:w-1/2 p-8 flex flex-col justify-center">
                     <h3 
                       className="text-2xl text-primary mb-4 font-headline-md uppercase tracking-wider"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {service.title}
                     </h3>

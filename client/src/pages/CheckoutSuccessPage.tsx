@@ -20,7 +20,7 @@ const CheckoutSuccessPage: React.FC = () => {
         
         <h1 
           className="text-4xl md:text-5xl font-bold text-primary mb-6 font-headline-lg uppercase tracking-wider"
-          style={{ fontFamily: "'Playfair Display', serif" }}
+          style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           Order Confirmed
         </h1>

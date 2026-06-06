@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'wouter';
+import { useSettings } from '@/hooks/useSettings';
 
 interface Service {
   id: number;
@@ -12,6 +13,7 @@ interface Service {
 export const Services: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const { settings } = useSettings();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -31,10 +33,10 @@ export const Services: React.FC = () => {
     <section id="services" className="relative w-full py-24 bg-surface overflow-hidden">
       {/* Section Header */}
       <div className="container mx-auto px-6 mb-16">
-        <span className="font-label-caps text-label-caps border-b border-primary pb-2">EXPERTISE</span>
-        <h2 className="font-headline-lg text-headline-lg mt-4 uppercase">Our Services</h2>
+        <span className="font-label-caps text-label-caps border-b border-primary pb-2">{settings.services_section_label || 'EXPERTISE'}</span>
+        <h2 className="font-headline-lg text-headline-lg mt-4 uppercase">{settings.services_section_title || 'Our Services'}</h2>
         <p className="font-body-md text-body-md mt-4 max-w-xl text-on-surface-variant">
-          Discover our comprehensive range of luxury hair and styling services, crafted to enhance your natural beauty.
+          {settings.services_section_subtitle || 'Discover our comprehensive range of luxury hair and styling services, crafted to enhance your natural beauty.'}
         </p>
       </div>
 
@@ -58,7 +60,7 @@ export const Services: React.FC = () => {
                     <img
                       src={service.image_url}
                       alt={service.title}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                     />
                   ) : (
                     <div className="w-full h-full bg-secondary-container flex items-center justify-center font-label-caps text-label-caps text-on-secondary-container">
