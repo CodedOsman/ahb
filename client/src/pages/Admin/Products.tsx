@@ -34,12 +34,12 @@ const ProductsAdmin: React.FC = () => {
     image_url: '',
     is_active: true,
     stock: 0,
-    variants: [] as { variant_type: string, length: string, price: string, stock: number }[]
+    variants: [] as { variant_type: string, size: string, length: string, texture: string, price: string, stock: number }[]
   });
 
   const [parsingImage, setParsingImage] = useState(false);
 
-  const calculateTotalStock = (variants: { variant_type: string, length: string; price: string; stock: number }[]) => {
+  const calculateTotalStock = (variants: { variant_type: string, size: string, length: string, texture: string; price: string; stock: number }[]) => {
     return variants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
   };
 
@@ -101,7 +101,7 @@ const ProductsAdmin: React.FC = () => {
           name: fullProduct.name,
           description: fullProduct.description,
           base_price: fullProduct.base_price,
-          image_url: fullProduct.image_url,
+          image_url: fullProduct.image_url || '',
           is_active: !!fullProduct.is_active,
           stock: variants.length ? calculateTotalStock(variants) : fullProduct.stock || 0,
           variants,
@@ -168,12 +168,10 @@ const ProductsAdmin: React.FC = () => {
   };
 
   const addVariant = () => {
-    const newVariants = [...formData.variants, { variant_type: '', length: '', price: '', stock: 0 }];
-    setFormData({
-      ...formData,
-      variants: newVariants,
-      stock: calculateTotalStock(newVariants),
-    });
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, { variant_type: '', size: '', length: '', texture: '', price: prev.base_price || '0', stock: 0 }]
+    }));
   };
 
   const removeVariant = (index: number) => {
@@ -408,7 +406,7 @@ const ProductsAdmin: React.FC = () => {
                   <label className="block text-[10px] uppercase tracking-widest text-warm-silver mb-2 font-bold">Or Direct Image URL</label>
                   <input 
                     type="text" 
-                    value={formData.image_url.startsWith('data:') ? '' : formData.image_url}
+                    value={formData.image_url && formData.image_url.startsWith('data:') ? '' : formData.image_url || ''}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                     className="w-full bg-alabaster border border-silk-gray/10 p-3 text-onyx outline-none focus:border-onyx transition-all"
                     placeholder="https://..."
@@ -430,55 +428,73 @@ const ProductsAdmin: React.FC = () => {
                   </button>
                 </div>
                 
-                {formData.variants.map((v, idx) => (
-                  <div key={idx} className="flex gap-4 items-end bg-black/5 p-4 rounded border border-silk-gray/10">
-                    <div className="flex-1">
-                      <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Variant (e.g. Wavy)</label>
-                      <input 
-                        type="text" 
-                        value={v.variant_type}
-                        onChange={(e) => updateVariant(idx, 'variant_type', e.target.value)}
-                        className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
-                        placeholder="Optional"
-                      />
+                {formData.variants.length > 0 && (
+                  <div className="bg-black/5 rounded border border-silk-gray/10 overflow-hidden">
+                    <div className="grid grid-cols-[1.5fr_1fr_1fr_1.5fr_1fr_1fr_40px] gap-2 p-3 bg-silk-gray/20 border-b border-silk-gray/10 text-[9px] uppercase tracking-widest text-warm-silver font-bold">
+                      <div>Variant (Type)</div>
+                      <div>Size</div>
+                      <div>Length</div>
+                      <div>Texture</div>
+                      <div>Price (£)</div>
+                      <div>Stock</div>
+                      <div className="text-center">Del</div>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Length (e.g. 18")</label>
-                      <input 
-                        type="text" 
-                        value={v.length}
-                        onChange={(e) => updateVariant(idx, 'length', e.target.value)}
-                        className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
-                        placeholder="Optional"
-                      />
+                    <div className="max-h-[40vh] overflow-y-auto">
+                      {formData.variants.map((v, idx) => (
+                        <div key={idx} className="grid grid-cols-[1.5fr_1fr_1fr_1.5fr_1fr_1fr_40px] gap-2 p-2 border-b border-silk-gray/5 last:border-b-0 items-center hover:bg-white/5 transition-colors">
+                          <input 
+                            type="text" 
+                            value={v.variant_type || ''}
+                            onChange={(e) => updateVariant(idx, 'variant_type', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                            placeholder="Optional"
+                          />
+                          <input 
+                            type="text" 
+                            value={v.size || ''}
+                            onChange={(e) => updateVariant(idx, 'size', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                            placeholder="Optional"
+                          />
+                          <input 
+                            type="text" 
+                            value={v.length || ''}
+                            onChange={(e) => updateVariant(idx, 'length', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                            placeholder="Optional"
+                          />
+                          <input 
+                            type="text" 
+                            value={v.texture || ''}
+                            onChange={(e) => updateVariant(idx, 'texture', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                            placeholder="Raw, Virgin, etc."
+                          />
+                          <input 
+                            type="number" 
+                            value={v.price}
+                            onChange={(e) => updateVariant(idx, 'price', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                          />
+                          <input 
+                            type="number" 
+                            value={v.stock}
+                            onChange={(e) => updateVariant(idx, 'stock', e.target.value)}
+                            className="w-full bg-alabaster border border-silk-gray/10 px-2 py-1.5 text-xs text-onyx outline-none focus:border-onyx transition-colors"
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => removeVariant(idx)}
+                            className="p-1.5 mx-auto text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded transition-all"
+                            title="Remove Variant"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Price (£)</label>
-                      <input 
-                        type="number" 
-                        value={v.price}
-                        onChange={(e) => updateVariant(idx, 'price', e.target.value)}
-                        className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-[8px] uppercase tracking-widest text-warm-silver mb-1">Stock</label>
-                      <input 
-                        type="number" 
-                        value={v.stock}
-                        onChange={(e) => updateVariant(idx, 'stock', e.target.value)}
-                        className="w-full bg-alabaster border border-silk-gray/10 p-2 text-sm text-onyx outline-none"
-                      />
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => removeVariant(idx)}
-                      className="p-2 text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 size={16} />
-                    </button>
                   </div>
-                ))}
+                )}
               </div>
 
               <div className="flex items-center gap-2">

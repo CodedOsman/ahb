@@ -7,7 +7,7 @@ interface PolicySection {
   content: string[];
 }
 
-const policies: PolicySection[] = [
+const defaultPolicies: PolicySection[] = [
   {
     icon: '💳',
     title: 'Deposits & Payments',
@@ -48,10 +48,21 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } },
 };
 
+import { useSettings } from '@/hooks/useSettings';
+
 const PoliciesPage: React.FC = () => {
+  const { settings } = useSettings();
+
+  let policies = defaultPolicies;
+  if (settings.site_policies) {
+    try {
+      policies = JSON.parse(settings.site_policies);
+    } catch(e) {}
+  }
+
   return (
     <div className="min-h-screen bg-background text-primary overflow-hidden">
       {/* Hero */}
@@ -108,10 +119,14 @@ const PoliciesPage: React.FC = () => {
               {/* Icon */}
               <div className="flex md:justify-center items-start pt-1">
                 <span
-                  className="text-4xl border border-primary/20 w-16 h-16 flex items-center justify-center group-hover:border-primary transition-colors duration-300"
+                  className="text-4xl border border-primary/20 w-16 h-16 flex items-center justify-center group-hover:border-primary transition-colors duration-300 overflow-hidden"
                   aria-hidden="true"
                 >
-                  {policy.icon}
+                  {(policy.icon && (policy.icon.startsWith('data:') || policy.icon.startsWith('http'))) ? (
+                    <img src={policy.icon} alt={policy.title} className="w-full h-full object-cover" />
+                  ) : (
+                    policy.icon
+                  )}
                 </span>
               </div>
 

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface Category {
   id: number;
   name: string;
   slug: string;
   type: string;
+  image_url?: string;
 }
 
 const CategoriesPage: React.FC = () => {
@@ -22,8 +24,32 @@ const CategoriesPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    type: 'product'
+    type: 'product',
+    image_url: ''
   });
+
+  const [parsingImage, setParsingImage] = useState(false);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image size must be less than 10MB');
+        return;
+      }
+      setParsingImage(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, image_url: reader.result as string }));
+        setParsingImage(false);
+      };
+      reader.onerror = () => {
+        setParsingImage(false);
+        alert('Failed to load image file');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -49,14 +75,16 @@ const CategoriesPage: React.FC = () => {
       setFormData({
         name: category.name,
         slug: category.slug,
-        type: category.type
+        type: category.type,
+        image_url: category.image_url || ''
       });
     } else {
       setEditingCategory(null);
       setFormData({
         name: '',
         slug: '',
-        type: 'product'
+        type: 'product',
+        image_url: ''
       });
     }
     setIsModalOpen(true);
@@ -76,20 +104,23 @@ const CategoriesPage: React.FC = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('admin_token');
+      console.log('Submitting formData:', formData);
       if (editingCategory) {
         await axios.put(`/api/admin/categories/${editingCategory.id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success('Category updated successfully');
       } else {
         await axios.post('/api/admin/categories', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success('Category created successfully');
       }
       setIsModalOpen(false);
       fetchCategories();
     } catch (error: any) {
       console.error('Error saving category:', error);
-      alert(error.response?.data?.error || 'Failed to save category');
+      toast.error(error.response?.data?.error || 'Failed to save category');
     }
   };
 
@@ -100,10 +131,11 @@ const CategoriesPage: React.FC = () => {
       await axios.delete(`/api/admin/categories/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      toast.success('Category deleted successfully');
       fetchCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
-      alert('Failed to delete category');
+      toast.error('Failed to delete category');
     }
   };
 
@@ -206,7 +238,7 @@ const CategoriesPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-alabaster w-full max-w-lg p-8 rounded-lg border border-silk-gray/20 shadow-2xl"
+              className="relative bg-alabaster w-full max-w-lg p-8 rounded-lg border border-silk-gray/20 shadow-2xl max-h-[90vh] overflow-y-auto"
             >
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -254,6 +286,54 @@ const CategoriesPage: React.FC = () => {
                     <option value="product">Product</option>
                     <option value="service">Service</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest text-warm-silver mb-2 font-bold">Thumbnail Image</label>
+                  <div className="relative group border-2 border-dashed border-silk-gray/20 hover:border-onyx/40 rounded-lg p-6 text-center cursor-pointer transition-all bg-silk-gray">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    {parsingImage ? (
+                      <div className="space-y-2 py-4">
+                        <div className="animate-spin w-6 h-6 border-2 border-onyx border-t-transparent rounded-full mx-auto"></div>
+                        <p className="text-[10px] text-warm-silver uppercase tracking-wider">Loading image...</p>
+                      </div>
+                    ) : formData.image_url ? (
+                      <div className="space-y-4">
+                        <div className="aspect-[4/3] w-28 mx-auto rounded overflow-hidden border border-silk-gray/10 shadow-sm relative">
+                          <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                          className="text-[9px] uppercase tracking-widest text-red-400 hover:underline font-bold z-20 relative"
+                        >
+                          Clear Image
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 py-4 text-warm-silver group-hover:text-onyx transition-colors">
+                        <p className="text-xs font-bold uppercase tracking-widest">Select Image File</p>
+                        <p className="text-[10px] text-warm-silver/60">Drag & drop or click to upload</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col justify-end">
+                  <label className="block text-[10px] uppercase tracking-widest text-warm-silver mb-2 font-bold">Or Direct Image URL</label>
+                  <input 
+                    type="text" 
+                    value={formData.image_url.startsWith('data:') ? '' : formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="w-full bg-silk-gray border border-silk-gray/20 p-3 text-onyx outline-none focus:border-onyx transition-all"
+                    placeholder="https://..."
+                  />
+                  <p className="text-[9px] text-warm-silver/50 mt-1 font-light italic">Useful for linking to external image hosts.</p>
                 </div>
 
                 <button 

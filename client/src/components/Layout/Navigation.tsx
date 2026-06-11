@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useCart } from '@/contexts/CartContext';
+import { useSettings } from '@/hooks/useSettings';
 
 export const Navigation: React.FC = () => {
   const { toggleCart, items } = useCart();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { settings } = useSettings();
 
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -18,17 +20,19 @@ export const Navigation: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-md border-b border-primary">
+    <header className="w-full z-40 bg-surface/90 backdrop-blur-md border-b border-primary relative">
       <div className="flex justify-between items-center w-full h-20 px-6 max-w-container-max mx-auto">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center">
             <img 
               alt="ASANTEY LOGO" 
               className="h-12 w-auto object-contain cursor-pointer" 
-              src="/images/logo.png"
+              src={settings.site_logo || "/images/logo.png"}
               onError={(e) => {
                 // Fallback to online logo if local image fails
-                (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
+                if (!settings.site_logo) {
+                  (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
+                }
               }}
             />
           </Link>

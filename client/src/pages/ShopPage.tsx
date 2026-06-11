@@ -12,7 +12,9 @@ interface Product {
   base_price: string;
   image_url: string;
   category_name: string;
+  category_slug: string;
   stock: number;
+  slug: string;
 }
 
 interface Category {
@@ -20,6 +22,7 @@ interface Category {
   name: string;
   slug: string;
   type: string;
+  image_url?: string;
 }
 
 interface CategoryCardProps {
@@ -36,20 +39,23 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.4 }}
       onClick={() => onClick(category.slug)}
-      className="group cursor-pointer bg-surface-container-low rounded-none overflow-hidden border border-primary hover:bg-primary transition-all duration-500 shadow-none flex flex-col aspect-square relative"
+      className={`group cursor-pointer bg-surface-container-low rounded-none overflow-hidden border border-primary transition-all duration-500 shadow-none flex flex-col aspect-square relative ${!category.image_url ? 'hover:bg-primary' : ''}`}
     >
-      <div className="absolute inset-0 bg-background/50 group-hover:bg-transparent transition-all duration-500 z-0"></div>
+      {category.image_url && (
+        <img src={category.image_url} alt={category.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 z-0" />
+      )}
+      <div className={`absolute inset-0 transition-all duration-500 z-0 ${category.image_url ? 'bg-black/60 group-hover:bg-black/40' : 'bg-background/50 group-hover:bg-transparent'}`}></div>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10">
-        <span className="font-label-caps text-xs tracking-[0.2em] uppercase text-secondary group-hover:text-on-primary/80 mb-4 transition-colors duration-500">
+        <span className={`font-label-caps text-xs tracking-[0.2em] uppercase mb-4 transition-colors duration-500 ${category.image_url ? 'text-white/80' : 'text-secondary group-hover:text-on-primary/80'}`}>
           Curated Collection
         </span>
         <h3 
-          className="text-3xl md:text-4xl text-primary group-hover:text-on-primary font-headline-lg uppercase tracking-wider transition-colors duration-500"
+          className={`text-3xl md:text-4xl font-headline-lg uppercase tracking-wider transition-colors duration-500 drop-shadow-lg ${category.image_url ? 'text-white' : 'text-primary group-hover:text-on-primary'}`}
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           {category.name}
         </h3>
-        <div className="mt-8 font-label-caps text-xs tracking-widest uppercase border border-primary/20 group-hover:border-on-primary/50 text-primary group-hover:text-on-primary px-6 py-3 transition-all duration-500 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0">
+        <div className={`mt-8 font-label-caps text-xs tracking-widest uppercase border px-6 py-3 transition-all duration-500 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 ${category.image_url ? 'border-white/50 text-white' : 'border-primary/20 group-hover:border-on-primary/50 text-primary group-hover:text-on-primary'}`}>
           View Products
         </div>
       </div>
@@ -231,7 +237,7 @@ const ShopPage: React.FC = () => {
                         transition={{ duration: 0.4 }}
                         className="bg-surface-container-low rounded-none overflow-hidden group border border-primary hover:bg-surface-container transition-all duration-500 shadow-none flex flex-col"
                       >
-                        <Link href={`/product/${product.id}`} className="cursor-pointer flex-1 flex flex-col">
+                        <Link href={`/product/${product.category_slug || 'category'}/${product.slug || product.id}`} className="cursor-pointer flex-1 flex flex-col">
                           <div className="relative h-80 bg-background overflow-hidden border-b border-primary">
                             <div className="absolute inset-0 flex items-center justify-center text-primary/10 text-4xl font-black font-display-lg uppercase">
                               {product.image_url && !product.image_url.startsWith('Product') ? '' : 'ASANTEY'}
@@ -240,7 +246,7 @@ const ShopPage: React.FC = () => {
                               <img
                                 src={product.image_url}
                                 alt={product.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                               />
                             )}
                           </div>

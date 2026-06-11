@@ -124,8 +124,8 @@ async function seed() {
     // Seed product variants
     for (const variant of productVariants) {
       await connection.query(
-        'INSERT INTO product_variants (id, product_id, length, price, stock, variant_type) VALUES (?, ?, ?, ?, ?, ?)',
-        [variant.id, variant.product_id, variant.length, variant.price, variant.stock, variant.variant_type]
+        'INSERT INTO product_variants (id, product_id, size, length, price, stock, variant_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [variant.id, variant.product_id, variant.size, variant.length, variant.price, variant.stock, variant.variant_type]
       );
     }
     console.log(\`Seeded \${productVariants.length} product variants.\`);

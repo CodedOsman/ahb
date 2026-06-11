@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import axios from 'axios';
 
 const AdminLogin: React.FC = () => {
@@ -70,6 +70,12 @@ const AdminLogin: React.FC = () => {
             {loading ? 'AUTHENTICATING...' : 'LOGIN'}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <Link href="/admin/forgot-password" className="text-xs uppercase tracking-widest text-warm-silver hover:text-onyx transition-colors">
+            Forgot Password?
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -17,6 +17,19 @@ const transporter = nodemailer.createTransport({
 
 const router = Router();
 
+// Get hero slides
+router.get('/hero-slides', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, display_order FROM hero_slides WHERE is_active = 1 ORDER BY display_order ASC, created_at DESC'
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching hero slides:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get all services
 router.get('/services', async (req, res) => {
   try {
@@ -45,7 +58,7 @@ router.get('/categories', async (req, res) => {
 router.get('/products', async (req, res) => {
   try {
     const { category, search } = req.query;
-    let query = 'SELECT p.*, p.stock, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.is_active = 1';
+    let query = 'SELECT p.*, p.stock, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.is_active = 1';
     const params: any[] = [];
 
     if (category) {
@@ -67,20 +80,22 @@ router.get('/products', async (req, res) => {
 });
 
 // Get single product with variants
-router.get('/products/:id', async (req, res) => {
+router.get('/products/:slug', async (req, res) => {
   try {
     const [productRows]: any = await pool.query(
-      'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?',
-      [req.params.id]
+      'SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? OR p.id = ?',
+      [req.params.slug, req.params.slug]
     );
 
     if (productRows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    const productId = productRows[0].id;
+
     const [variantRows] = await pool.query(
       'SELECT * FROM product_variants WHERE product_id = ? ORDER BY price ASC',
-      [req.params.id]
+      [productId]
     );
     res.json({
       ...productRows[0],
@@ -186,6 +201,61 @@ router.post('/reviews', async (req, res) => {
     res.json({ message: 'Review submitted successfully. It will appear after approval.' });
   } catch (error) {
     console.error('Error submitting review:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get Google Reviews
+let cachedGoogleReviews: any[] = [];
+let googleReviewsLastFetch = 0;
+const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+
+router.get('/reviews/google', async (req, res) => {
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const placeId = process.env.GOOGLE_PLACE_ID;
+
+  if (!apiKey || !placeId) {
+    return res.json([]); // Return empty if not configured
+  }
+
+  if (Date.now() - googleReviewsLastFetch < CACHE_TTL && cachedGoogleReviews.length > 0) {
+    return res.json(cachedGoogleReviews);
+  }
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.result && data.result.reviews) {
+      cachedGoogleReviews = data.result.reviews.map((r: any) => ({
+        id: `google-${r.time}`,
+        name: r.author_name,
+        service: 'Google Review',
+        rating: r.rating,
+        content: r.text,
+        created_at: new Date(r.time * 1000).toISOString(),
+        isGoogle: true,
+      }));
+      googleReviewsLastFetch = Date.now();
+    }
+    
+    res.json(cachedGoogleReviews);
+  } catch (error) {
+    console.error('Error fetching Google reviews:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get active promotions
+router.get('/promotions/active', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM promotions WHERE is_active = 1 AND (end_time IS NULL OR end_time > NOW()) ORDER BY created_at DESC'
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching active promotions:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

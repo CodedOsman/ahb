@@ -17,7 +17,7 @@ export const useLenis = () => {
 
     const lenis = new Lenis({
       duration: 0.4,
-      easing: (t) => t,
+      easing: (t: number) => t,
       smoothWheel: true,
       touchMultiplier: 1,
       wheelMultiplier: 1,

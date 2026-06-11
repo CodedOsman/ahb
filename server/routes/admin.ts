@@ -3,9 +3,21 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../db';
 import { logError } from '../utils/logger';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'asantey_luxury_salon_secret_key_2024';
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 // Middleware to verify JWT
 export const authenticateToken = (req: any, res: any, next: any) => {
@@ -42,6 +54,98 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Admin Forgot Password
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [rows]: any = await pool.query('SELECT * FROM admins WHERE email = ?', [email]);
+    const admin = rows[0];
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin with this email not found' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour
+
+    await pool.query('UPDATE admins SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [resetToken, resetTokenExpires, admin.id]);
+
+    const resetUrl = `http://${req.headers.host}/admin/reset-password?token=${resetToken}`;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: 'Password Reset - Asantey Luxury Salon',
+      html: `
+        <p>You requested a password reset.</p>
+        <p>Click this <a href="${resetUrl}">link</a> to set a new password.</p>
+        <p>This link will expire in 1 hour.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'Password reset link sent to email' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin Reset Password
+router.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+  try {
+    const [rows]: any = await pool.query('SELECT * FROM admins WHERE reset_token = ? AND reset_token_expires > NOW()', [token]);
+    const admin = rows[0];
+    if (!admin) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE admins SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [passwordHash, admin.id]);
+
+    res.json({ message: 'Password successfully reset' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin Change Password (Authenticated)
+router.post('/change-password', authenticateToken, async (req: any, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    const [rows]: any = await pool.query('SELECT * FROM admins WHERE id = ?', [req.user.id]);
+    const admin = rows[0];
+    
+    if (!admin || !(await bcrypt.compare(currentPassword, admin.password_hash))) {
+      return res.status(401).json({ error: 'Incorrect current password' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE admins SET password_hash = ? WHERE id = ?', [passwordHash, req.user.id]);
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin Profile Update
+router.put('/profile', authenticateToken, async (req: any, res) => {
+  const { username, email } = req.body;
+  try {
+    await pool.query('UPDATE admins SET username = ?, email = ? WHERE id = ?', [username, email, req.user.id]);
+    res.json({ message: 'Profile updated successfully', admin: { id: req.user.id, username, email } });
+  } catch (error: any) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Username or email already exists' });
+    }
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Manage Categories
 router.get('/categories', authenticateToken, async (req, res) => {
   try {
@@ -53,11 +157,11 @@ router.get('/categories', authenticateToken, async (req, res) => {
 });
 
 router.post('/categories', authenticateToken, async (req, res) => {
-  const { name, slug, type } = req.body;
+  const { name, slug, type, image_url } = req.body;
   try {
     const [result]: any = await pool.query(
-      'INSERT INTO categories (name, slug, type) VALUES (?, ?, ?)',
-      [name, slug, type]
+      'INSERT INTO categories (name, slug, type, image_url) VALUES (?, ?, ?, ?)',
+      [name, slug, type, image_url || null]
     );
     res.json({ id: result.insertId, message: 'Category created' });
   } catch (error: any) {
@@ -69,11 +173,12 @@ router.post('/categories', authenticateToken, async (req, res) => {
 });
 
 router.put('/categories/:id', authenticateToken, async (req, res) => {
-  const { name, slug, type } = req.body;
+  const { name, slug, type, image_url } = req.body;
+  console.log(`[PUT /categories/${req.params.id}] name: ${name}, image_url length: ${image_url?.length || 0}`);
   try {
     await pool.query(
-      'UPDATE categories SET name = ?, slug = ?, type = ? WHERE id = ?',
-      [name, slug, type, req.params.id]
+      'UPDATE categories SET name = ?, slug = ?, type = ?, image_url = ? WHERE id = ?',
+      [name, slug, type, image_url || null, req.params.id]
     );
     res.json({ message: 'Category updated' });
   } catch (error: any) {
@@ -111,30 +216,72 @@ router.get('/services', authenticateToken, async (req, res) => {
 
 router.post('/services', authenticateToken, async (req, res) => {
   const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  const connection = await pool.getConnection();
   try {
-    const [result]: any = await pool.query(
-      'INSERT INTO services (category_id, title, description, price, image_url, booking_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [category_id, title, description, price, image_url, booking_link || null, is_active === undefined ? 1 : is_active]
-    );
-    res.json({ id: result.insertId, message: 'Service created' });
+    const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    let success = false;
+    let insertId = null;
+
+    while (!success) {
+      try {
+        const [result]: any = await connection.query(
+          'INSERT INTO services (category_id, title, slug, description, price, image_url, booking_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [category_id, title, slug, description, price, image_url, booking_link || null, is_active === undefined ? 1 : is_active]
+        );
+        insertId = result.insertId;
+        success = true;
+      } catch (err: any) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          slug = `${baseSlug}-${counter}`;
+          counter++;
+        } else {
+          throw err;
+        }
+      }
+    }
+    res.json({ id: insertId, message: 'Service created' });
   } catch (error) {
     logError('CREATE_SERVICE', error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 
 
 router.put('/services/:id', authenticateToken, async (req, res) => {
   const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  const connection = await pool.getConnection();
   try {
-    await pool.query(
-      'UPDATE services SET category_id = ?, title = ?, description = ?, price = ?, image_url = ?, booking_link = ?, is_active = ? WHERE id = ?',
-      [category_id, title, description, price, image_url, booking_link || null, is_active, req.params.id]
-    );
+    const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    let success = false;
+
+    while (!success) {
+      try {
+        await connection.query(
+          'UPDATE services SET category_id = ?, title = ?, slug = ?, description = ?, price = ?, image_url = ?, booking_link = ?, is_active = ? WHERE id = ?',
+          [category_id, title, slug, description, price, image_url, booking_link || null, is_active, req.params.id]
+        );
+        success = true;
+      } catch (err: any) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          slug = `${baseSlug}-${counter}`;
+          counter++;
+        } else {
+          throw err;
+        }
+      }
+    }
     res.json({ message: 'Service updated' });
   } catch (error) {
     logError('UPDATE_SERVICE', error);
     res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 
@@ -157,19 +304,36 @@ router.post('/products', authenticateToken, async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const [result]: any = await connection.query(
-      'INSERT INTO products (category_id, name, description, base_price, image_url, is_active, stock) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [category_id, name, description, base_price, image_url, is_active === undefined ? 1 : is_active, totalStock]
-    );
+    const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    let success = false;
+    let productId = null;
 
-    const productId = result.insertId;
+    while (!success) {
+        try {
+            const [result]: any = await connection.query(
+              'INSERT INTO products (category_id, name, slug, description, base_price, image_url, is_active, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [category_id, name, slug, description, base_price, image_url, is_active === undefined ? 1 : is_active, totalStock]
+            );
+            productId = result.insertId;
+            success = true;
+        } catch (err: any) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            } else {
+                throw err;
+            }
+        }
+    }
 
     if (variants && Array.isArray(variants)) {
-      for (const v of variants) {
-        await connection.query(
-          'INSERT INTO product_variants (product_id, variant_type, length, price, stock) VALUES (?, ?, ?, ?, ?)',
-          [productId, v.variant_type || '', v.length || '', v.price, v.stock || 0]
-        );
+        for (const variant of req.body.variants) {
+          await connection.query(
+            'INSERT INTO product_variants (product_id, variant_type, size, length, texture, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [productId, variant.variant_type || null, variant.size || null, variant.length || null, variant.texture || null, variant.price, variant.stock || 0]
+          );
       }
     }
 
@@ -198,20 +362,37 @@ router.put('/products/:id', authenticateToken, async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    await connection.query(
-      'UPDATE products SET category_id = ?, name = ?, description = ?, base_price = ?, image_url = ?, is_active = ?, stock = ? WHERE id = ?',
-      [category_id, name, description, base_price, image_url, is_active, totalStock, req.params.id]
-    );
+    const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    let success = false;
+
+    while (!success) {
+        try {
+            await connection.query(
+              'UPDATE products SET category_id = ?, name = ?, slug = ?, description = ?, base_price = ?, image_url = ?, is_active = ?, stock = ? WHERE id = ?',
+              [category_id, name, slug, description, base_price, image_url, is_active, totalStock, req.params.id]
+            );
+            success = true;
+        } catch (err: any) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            } else {
+                throw err;
+            }
+        }
+    }
 
     // Update variants: Delete and re-insert for simplicity or match IDs
     await connection.query('DELETE FROM product_variants WHERE product_id = ?', [req.params.id]);
     
     if (variants && Array.isArray(variants)) {
-      for (const v of variants) {
-        await connection.query(
-          'INSERT INTO product_variants (product_id, variant_type, length, price, stock) VALUES (?, ?, ?, ?, ?)',
-          [req.params.id, v.variant_type || '', v.length || '', v.price, v.stock || 0]
-        );
+        for (const variant of req.body.variants) {
+          await connection.query(
+            'INSERT INTO product_variants (product_id, variant_type, size, length, texture, price, stock) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [req.params.id, variant.variant_type || null, variant.size || null, variant.length || null, variant.texture || null, variant.price, variant.stock || 0]
+          );
       }
     }
 
@@ -425,6 +606,163 @@ router.delete('/reviews/:id', authenticateToken, async (req, res) => {
     await pool.query('DELETE FROM reviews WHERE id = ?', [req.params.id]);
     res.json({ message: 'Review deleted' });
   } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// --- Hero Slides Management ---
+
+router.get('/hero-slides', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM hero_slides ORDER BY display_order ASC, created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching admin hero slides:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/hero-slides', authenticateToken, async (req, res) => {
+  const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  if (!image_url) {
+    return res.status(400).json({ error: 'Image URL is required' });
+  }
+  try {
+    await pool.query(
+      'INSERT INTO hero_slides (image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [image_url, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active !== undefined ? is_active : 1, display_order || 0]
+    );
+    res.json({ message: 'Hero slide created successfully' });
+  } catch (error) {
+    console.error('Error creating hero slide:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/hero-slides/:id', authenticateToken, async (req, res) => {
+  const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  try {
+    await pool.query(
+      'UPDATE hero_slides SET image_url = ?, headline = ?, subtitle = ?, button_1_text = ?, button_1_link = ?, button_2_text = ?, button_2_link = ?, is_active = ?, display_order = ? WHERE id = ?',
+      [image_url, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active, display_order, req.params.id]
+    );
+    res.json({ message: 'Hero slide updated successfully' });
+  } catch (error) {
+    console.error('Error updating hero slide:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/hero-slides/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM hero_slides WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Hero slide deleted' });
+  } catch (error) {
+    console.error('Error deleting hero slide:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// --- Promo Codes Management ---
+router.get('/promo-codes', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM promo_codes ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching promo codes:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/promo-codes', authenticateToken, async (req, res) => {
+  const { code, discount_percentage, is_active, valid_until } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO promo_codes (code, discount_percentage, is_active, valid_until) VALUES (?, ?, ?, ?)',
+      [code, discount_percentage, is_active !== undefined ? is_active : 1, valid_until || null]
+    );
+    res.json({ message: 'Promo code created successfully' });
+  } catch (error: any) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Promo code already exists' });
+    }
+    console.error('Error creating promo code:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/promo-codes/:id', authenticateToken, async (req, res) => {
+  const { code, discount_percentage, is_active, valid_until } = req.body;
+  try {
+    await pool.query(
+      'UPDATE promo_codes SET code = ?, discount_percentage = ?, is_active = ?, valid_until = ? WHERE id = ?',
+      [code, discount_percentage, is_active, valid_until || null, req.params.id]
+    );
+    res.json({ message: 'Promo code updated successfully' });
+  } catch (error: any) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Promo code already exists' });
+    }
+    console.error('Error updating promo code:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/promo-codes/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM promo_codes WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Promo code deleted' });
+  } catch (error) {
+    console.error('Error deleting promo code:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// --- Promotions (Banners) Management ---
+router.get('/promotions', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM promotions ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching promotions:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/promotions', authenticateToken, async (req, res) => {
+  const { title, message, end_time, is_active } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO promotions (title, message, end_time, is_active) VALUES (?, ?, ?, ?)',
+      [title || null, message, end_time || null, is_active !== undefined ? is_active : 1]
+    );
+    res.json({ message: 'Promotion created successfully' });
+  } catch (error) {
+    console.error('Error creating promotion:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/promotions/:id', authenticateToken, async (req, res) => {
+  const { title, message, end_time, is_active } = req.body;
+  try {
+    await pool.query(
+      'UPDATE promotions SET title = ?, message = ?, end_time = ?, is_active = ? WHERE id = ?',
+      [title || null, message, end_time || null, is_active, req.params.id]
+    );
+    res.json({ message: 'Promotion updated successfully' });
+  } catch (error) {
+    console.error('Error updating promotion:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/promotions/:id', authenticateToken, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM promotions WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Promotion deleted' });
+  } catch (error) {
+    console.error('Error deleting promotion:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

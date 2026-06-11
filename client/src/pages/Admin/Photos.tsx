@@ -149,7 +149,7 @@ const PhotosAdmin: React.FC = () => {
                   loading="lazy"
                 />
               </div>
-              <div className="p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent absolute inset-0 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent absolute inset-0 flex flex-col justify-end transition-opacity duration-300">
                 <p className="text-white font-medium text-sm leading-relaxed drop-shadow-md">
                   {photo.caption || 'No caption'}
                 </p>

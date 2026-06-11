@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS categories (
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     type ENUM('service', 'product') NOT NULL,
+    image_url MEDIUMTEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     variant_type VARCHAR(100) NULL,
+    size VARCHAR(100) NULL,
     length VARCHAR(50) NULL,
     price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
@@ -53,6 +55,8 @@ CREATE TABLE IF NOT EXISTS admins (
     username VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE,
+    reset_token VARCHAR(255),
+    reset_token_expires TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

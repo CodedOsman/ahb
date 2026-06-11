@@ -71,6 +71,11 @@ export const Cart: React.FC = () => {
   const [deliveryZones, setDeliveryZones] = useState<any[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<string>('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string, percentage: number } | null>(null);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -94,13 +99,29 @@ export const Cart: React.FC = () => {
   
   const total = subtotal + deliveryFee;
 
+  const handleApplyPromo = async () => {
+    if (!promoCode) return;
+    setIsApplyingPromo(true);
+    setPromoError('');
+    try {
+      const res = await axios.post('/api/checkout/validate-promo', { code: promoCode });
+      setAppliedDiscount({ code: promoCode, percentage: res.data.discount_percentage });
+    } catch (err: any) {
+      setPromoError(err.response?.data?.error || 'Invalid promo code');
+      setAppliedDiscount(null);
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!selectedZoneId) return alert('Please select a delivery zone');
     setIsCheckingOut(true);
     try {
       const res = await axios.post('/api/checkout/create-session', {
         items,
-        deliveryZoneId: selectedZoneId
+        deliveryZoneId: selectedZoneId,
+        discount_code: appliedDiscount?.code
       });
       if (res.data.url) {
         window.location.href = res.data.url;
@@ -191,19 +212,48 @@ export const Cart: React.FC = () => {
                     </select>
                   </div>
 
+                  {/* Promo Code Input */}
+                  <div className="space-y-2">
+                    <label className="text-[11px] uppercase tracking-widest text-primary font-bold font-label-caps">Promo Code</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={promoCode} 
+                        onChange={e => setPromoCode(e.target.value)} 
+                        placeholder="Enter code"
+                        className="flex-1 bg-background border border-primary p-3 text-primary outline-none focus:bg-white text-xs font-label-caps rounded-none"
+                      />
+                      <button 
+                        onClick={handleApplyPromo} 
+                        disabled={isApplyingPromo || !promoCode}
+                        className="px-4 bg-primary text-on-primary font-bold text-xs uppercase cursor-pointer disabled:opacity-50"
+                      >
+                        {isApplyingPromo ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {promoError && <p className="text-[10px] text-error font-bold">{promoError}</p>}
+                    {appliedDiscount && <p className="text-[10px] text-primary font-bold">Applied: {appliedDiscount.percentage}% off</p>}
+                  </div>
+
                   {/* Price Breakdown */}
                   <div className="space-y-2 text-xs pt-2 font-label-caps tracking-wider">
                     <div className="flex justify-between text-primary">
                       <span>Subtotal ({itemCount} items)</span>
                       <span className="font-bold">£{subtotal.toFixed(2)}</span>
                     </div>
+                    {appliedDiscount && (
+                      <div className="flex justify-between text-primary font-bold">
+                        <span>Discount ({appliedDiscount.percentage}%)</span>
+                        <span>-£{(subtotal * (appliedDiscount.percentage / 100)).toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-secondary">
                       <span>Delivery</span>
                       <span className="font-bold">£{deliveryFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm font-bold text-primary pt-2 border-t border-primary/20">
                       <span>Total</span>
-                      <span>£{total.toFixed(2)}</span>
+                      <span>£{(total - (appliedDiscount ? subtotal * (appliedDiscount.percentage / 100) : 0)).toFixed(2)}</span>
                     </div>
                   </div>
 

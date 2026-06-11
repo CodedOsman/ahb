@@ -9,8 +9,10 @@ interface Product {
   name: string;
   base_price: string;
   category_name: string;
+  category_slug: string;
   image_url: string;
   stock: number;
+  slug: string;
 }
 
 interface ProductCardProps {
@@ -50,7 +52,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : product.image_url;
 
   return (
-    <Link href={`/product/${product.id}`} className="group cursor-pointer block">
+    <Link href={`/product/${product.category_slug || 'category'}/${product.slug || product.id}`} className="group cursor-pointer block">
       <div>
         <div className="aspect-[3/4] bg-surface-container-highest mb-4 overflow-hidden relative">
           <img
@@ -91,6 +93,7 @@ interface Category {
   name: string;
   slug: string;
   type: string;
+  image_url?: string;
 }
 
 interface CategoryCardProps {
@@ -99,22 +102,24 @@ interface CategoryCardProps {
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
-  // Use stylized text-based cards for categories since they don't have images in DB
   return (
     <div 
       onClick={() => onClick(category.slug)}
-      className="group cursor-pointer block border border-white/20 bg-surface-container-highest hover:bg-white transition-all duration-500 overflow-hidden relative aspect-[4/3] flex flex-col justify-center items-center text-center p-6"
+      className={`group cursor-pointer block border border-white/20 bg-surface-container-highest transition-all duration-500 overflow-hidden relative aspect-[4/3] flex flex-col justify-center items-center text-center p-6 ${!category.image_url ? 'hover:bg-white' : ''}`}
     >
-      <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-all duration-500 z-0"></div>
-      <div className="z-10 text-white group-hover:text-black transition-colors duration-500">
-        <span className="font-label-caps text-[10px] tracking-widest uppercase opacity-70 mb-2 block">
+      {category.image_url && (
+        <img src={category.image_url} alt={category.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 z-0" />
+      )}
+      <div className={`absolute inset-0 transition-all duration-500 z-0 ${category.image_url ? 'bg-black/40 group-hover:bg-black/20' : 'bg-black/40 group-hover:bg-transparent'}`}></div>
+      <div className={`z-10 transition-colors duration-500 ${category.image_url ? 'text-white' : 'text-white group-hover:text-black'}`}>
+        <span className="font-label-caps text-[10px] tracking-widest uppercase opacity-70 mb-2 block drop-shadow-md">
           Collection
         </span>
-        <h3 className="font-headline-md text-2xl uppercase tracking-wider">
+        <h3 className="font-headline-md text-2xl uppercase tracking-wider drop-shadow-md">
           {category.name}
         </h3>
       </div>
-      <div className="absolute bottom-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 text-black font-label-caps text-xs tracking-widest uppercase">
+      <div className={`absolute bottom-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 font-label-caps text-xs tracking-widest uppercase ${category.image_url ? 'text-white drop-shadow-md' : 'text-black'}`}>
         Explore
       </div>
     </div>

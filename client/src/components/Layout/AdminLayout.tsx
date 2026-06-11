@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, Scissors, ShoppingBag, Settings, LogOut, Menu, X, Camera, Star } from 'lucide-react';
+import { LayoutDashboard, Scissors, ShoppingBag, Settings, LogOut, Menu, X, Camera, Star, MonitorPlay } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -27,6 +27,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: 'Delivery Zones', icon: Settings, path: '/admin/delivery' },
     { name: 'Client Photos', icon: Camera, path: '/admin/photos' },
     { name: 'Reviews', icon: Star, path: '/admin/reviews' },
+    { name: 'Hero Slides', icon: MonitorPlay, path: '/admin/hero-slides' },
+    { name: 'Promotions', icon: Star, path: '/admin/promotions' },
     { name: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
 
@@ -37,7 +39,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-alabaster flex">
+    <div className="h-screen overflow-hidden bg-alabaster flex">
       {/* Sidebar */}
       <aside 
         className={`${
@@ -58,7 +60,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-8 space-y-2">
+        <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto hide-scrollbar">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;

@@ -9,6 +9,7 @@ interface Review {
   content: string;
   rating: number;
   created_at: string;
+  isGoogle?: boolean;
 }
 
 const StarRating: React.FC<{ rating: number; interactive?: boolean; onRate?: (r: number) => void }> = ({ rating, interactive = false, onRate }) => {
@@ -52,12 +53,18 @@ export const Reviews: React.FC = () => {
   const [form, setForm] = useState({ name: '', service: '', rating: 5, content: '' });
 
   useEffect(() => {
-    axios.get('/api/reviews')
-      .then((res) => {
-        if (Array.isArray(res.data)) setReviews(res.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      axios.get('/api/reviews').catch(() => ({ data: [] })),
+      axios.get('/api/reviews/google').catch(() => ({ data: [] }))
+    ]).then(([localRes, googleRes]) => {
+      const localReviews = Array.isArray(localRes.data) ? localRes.data : [];
+      const googleReviews = Array.isArray(googleRes.data) ? googleRes.data : [];
+      
+      const combined = [...localReviews, ...googleReviews].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setReviews(combined);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,12 +138,14 @@ export const Reviews: React.FC = () => {
                 </div>
                 {/* Reviewer Details */}
                 <div className="flex items-center gap-3 pt-6 border-t border-primary/10">
-                  <div className="w-9 h-9 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
-                    {review.name.slice(0, 2)}
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs uppercase ${review.isGoogle ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 'bg-primary/5 border border-primary/10 text-primary'}`}>
+                    {review.isGoogle ? 'G' : review.name.slice(0, 2)}
                   </div>
                   <div>
                     <h4 className="font-label-caps text-label-caps text-[11px] text-primary">{review.name}</h4>
-                    <span className="text-[10px] opacity-60 uppercase tracking-widest block mt-0.5">{review.service}</span>
+                    <span className="text-[10px] opacity-60 uppercase tracking-widest block mt-0.5">
+                      {review.isGoogle ? 'Google Review' : review.service}
+                    </span>
                   </div>
                 </div>
               </div>

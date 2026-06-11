@@ -41,7 +41,7 @@ const AboutPage: React.FC = () => {
             transition={{ duration: 1 }}
           >
             <h1 
-              className="text-6xl md:text-8xl font-bold text-primary mb-8 leading-tight font-display-lg tracking-tight uppercase"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-8 leading-tight font-display-lg tracking-tight uppercase relative z-20"
               style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               {settings.about_hero_title || 'The Art of Sophistication'}
@@ -62,10 +62,9 @@ const AboutPage: React.FC = () => {
               <img 
                 src="/images/hero-1.webp" 
                 alt="Salon Interior" 
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                className="w-full h-full object-cover transition-all duration-700"
               />
             </div>
-            <div className="absolute -bottom-8 -right-8 w-64 h-64 border border-primary z-0 hidden md:block"></div>
           </motion.div>
         </div>
 
@@ -118,7 +117,7 @@ const AboutPage: React.FC = () => {
                 <img 
                   src={photo.image_url} 
                   alt={photo.caption || 'Client transformation'} 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 duration-700 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -135,7 +134,7 @@ const AboutPage: React.FC = () => {
         </div>
 
         {/* Contact Information */}
-        <div className="bg-surface-container-low p-12 md:p-16 relative mb-16 overflow-hidden border border-primary rounded-none shadow-none">
+        <div id="contact" className="bg-surface-container-low p-12 md:p-16 relative mb-16 overflow-hidden border border-primary rounded-none shadow-none scroll-mt-32">
           <div className="relative z-10 max-w-2xl mx-auto text-center">
             <h3 
               className="text-3xl font-bold text-primary mb-8 font-headline-md uppercase tracking-widest"

@@ -29,9 +29,11 @@ export const Footer: React.FC = () => {
             <img 
               alt="ASANTEY" 
               className="h-16 w-auto mb-8 cursor-pointer" 
-              src="/images/logo.png"
+              src={settings.site_logo || "/images/logo.png"}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
+                if (!settings.site_logo) {
+                  (e.target as HTMLImageElement).src = "https://lh3.googleusercontent.com/aida/ADBb0uhHIMu3aN7Mv2CFtNLh3hhzuewZebUB-erUVLTiL2jXVjX3Y2bC2O-h-YlOfpS8bzARTWHdNr4vU0cVkl89SAc6XlS3S0OP8ggrVS7FfJ5xdsY-_w5E0izWs8xT6yjgzMQgltvUJQn_Gv5JUC7Ur2GJozn7Zyrnf1L1-zbtmRt-o_DQdqfpN4p9smdbMTTIu8V4mhL3ShB1JWgE7Q51BJU_hFU0P0KP1Ft1hLfbL-E8BOiQuK60Ez7aZ-4";
+                }
               }}
             />
           </Link>
@@ -39,9 +41,9 @@ export const Footer: React.FC = () => {
             {settings.footer_description || 'Luxury hair and braiding services for the modern woman. Redefining elegance through artistry.'}
           </p>
           <div className="font-body-md text-body-md space-y-2 opacity-70">
-            <p>{settings.contact_address || '358 Radford Road, Nottingham, NG7 5GQ'}</p>
-            <p>{settings.contact_phone || '07827129797'}</p>
-            <p>{settings.contact_email || 'hello@asantey.com'}</p>
+            {settings.contact_address && <p>{settings.contact_address}</p>}
+            {settings.contact_phone && <p>{settings.contact_phone}</p>}
+            {settings.contact_email && <p>{settings.contact_email}</p>}
           </div>
         </div>
 
@@ -70,50 +72,71 @@ export const Footer: React.FC = () => {
           <h4 className="font-label-caps text-label-caps mb-8">COMPANY</h4>
           <ul className="flex flex-col gap-4 font-body-md text-body-md">
             <li><Link href="/policies" className="opacity-70 hover:opacity-100 hover:line-through transition-all">POLICIES</Link></li>
-            <li><a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">CONTACT</a></li>
+            <li><Link href="/about#contact" className="opacity-70 hover:opacity-100 hover:line-through transition-all">CONTACT</Link></li>
           </ul>
         </div>
 
-        <div>
-          <h4 className="font-label-caps text-label-caps mb-8">SOCIAL</h4>
-          <ul className="flex flex-col gap-4 font-body-md text-body-md">
-            <li>
-              <a 
-                className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
-                href={settings.social_instagram || 'https://www.instagram.com/ahb_salon'}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                INSTAGRAM
-              </a>
-            </li>
-            <li>
-              <a 
-                className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
-                href={settings.social_tiktok || 'https://www.tiktok.com/@ahbsalon'}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                TIKTOK
-              </a>
-            </li>
-            <li>
-              <a className="opacity-70 hover:opacity-100 hover:line-through transition-all" href="#">
-                PINTEREST
-              </a>
-            </li>
-          </ul>
-        </div>
+        {(settings.social_instagram || settings.social_tiktok || settings.social_facebook || settings.social_pinterest) && (
+          <div>
+            <h4 className="font-label-caps text-label-caps mb-8">SOCIAL</h4>
+            <ul className="flex flex-col gap-4 font-body-md text-body-md">
+              {settings.social_instagram && (
+                <li>
+                  <a 
+                    className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                    href={settings.social_instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    INSTAGRAM
+                  </a>
+                </li>
+              )}
+              {settings.social_tiktok && (
+                <li>
+                  <a 
+                    className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                    href={settings.social_tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    TIKTOK
+                  </a>
+                </li>
+              )}
+              {settings.social_facebook && (
+                <li>
+                  <a 
+                    className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                    href={settings.social_facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    FACEBOOK
+                  </a>
+                </li>
+              )}
+              {settings.social_pinterest && (
+                <li>
+                  <a 
+                    className="opacity-70 hover:opacity-100 hover:line-through transition-all" 
+                    href={settings.social_pinterest}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    PINTEREST
+                  </a>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
       </div>
 
-      <div className="max-w-container-max mx-auto px-6 pt-12 border-t border-primary/20 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="font-label-caps text-label-caps text-primary opacity-70">
+      <div className="max-w-container-max mx-auto px-6 pt-12 border-t border-primary/20 flex justify-center items-center">
+        <p className="font-label-caps text-label-caps text-primary opacity-70 text-center">
           © {new Date().getFullYear()} ASANTEY HAIR & BEAUTY. ALL RIGHTS RESERVED.
         </p>
-        <div className="flex gap-8">
-          <a className="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">TERMS OF SERVICE</a>
-          <a className="font-label-caps text-label-caps opacity-70 hover:opacity-100" href="#">PRIVACY POLICY</a>
-        </div>
       </div>
     </footer>
   );

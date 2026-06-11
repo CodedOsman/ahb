@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 router.post('/create-session', async (req, res) => {
   try {
-    const { items, deliveryZoneId } = req.body;
+    const { items, deliveryZoneId, discount_code } = req.body;
 
     // Fetch delivery zone
     const [zoneRows]: any = await pool.query('SELECT * FROM delivery_zones WHERE id = ?', [deliveryZoneId]);
@@ -60,12 +60,38 @@ router.post('/create-session', async (req, res) => {
     });
 
     // Calculate totals for our database
-    const subtotal = items.reduce((acc: number, item: any) => {
+    let subtotal = items.reduce((acc: number, item: any) => {
         const price = parseFloat(item.price.replace('£', '').replace('$', ''));
         return acc + price * item.quantity;
     }, 0);
-    const deliveryFee = parseFloat(deliveryZone.price);
+
+    let discountAmount = 0;
+    if (discount_code) {
+      const [promoRows]: any = await pool.query(
+        'SELECT * FROM promo_codes WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > NOW())',
+        [discount_code]
+      );
+      if (promoRows.length > 0) {
+        const promo = promoRows[0];
+        discountAmount = subtotal * (promo.discount_percentage / 100);
+        subtotal = subtotal - discountAmount;
+      }
+    }
+
+    const deliveryFee = parseFloat(deliveryZoneId === 0 ? '0' : deliveryZone.price); // handle pickup or free delivery if needed
     const total = subtotal + deliveryFee; // We are removing tax for simplicity, but if needed we can add it. Assuming prices include tax or no tax.
+
+    // If discount was applied, we need to distribute it across the line items so Stripe accepts it 
+    // or add a negative line item if Stripe allows (Stripe does not allow negative line items easily).
+    // Instead we use Stripe Coupons, but for simplicity, we adjust the unit_amount of each item proportionally.
+    if (discountAmount > 0) {
+       const discountFactor = subtotal / (subtotal + discountAmount);
+       line_items.forEach((li: any) => {
+         if (li.price_data.product_data.name !== `Shipping: ${deliveryZone.name}`) {
+           li.price_data.unit_amount = Math.round(li.price_data.unit_amount * discountFactor);
+         }
+       });
+    }
 
     const origin = req.headers.origin || 'http://localhost:3000';
 
@@ -111,6 +137,26 @@ router.post('/create-session', async (req, res) => {
   }
 });
 
+router.post('/validate-promo', async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      return res.status(400).json({ error: 'Promo code is required' });
+    }
+    const [promoRows]: any = await pool.query(
+      'SELECT * FROM promo_codes WHERE code = ? AND is_active = 1 AND (valid_until IS NULL OR valid_until > NOW())',
+      [code]
+    );
+    if (promoRows.length === 0) {
+      return res.status(404).json({ error: 'Invalid or expired promo code' });
+    }
+    res.json({ discount_percentage: promoRows[0].discount_percentage });
+  } catch (error: any) {
+    console.error('Promo validation error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // We need raw body for Stripe webhook signature verification
 // Webhook parsing is handled in index.ts
 router.post('/webhook', async (req, res) => {
@@ -143,15 +189,25 @@ router.post('/webhook', async (req, res) => {
         ['paid', customerEmail, customerName, shippingAddressStr, sessionId]
       );
 
-      // Fetch the order items to reduce stock and build email summary
-      const [orderRows]: any = await pool.query('SELECT id, subtotal, delivery_fee FROM orders WHERE stripe_session_id = ?', [sessionId]);
-      if (orderRows.length > 0) {
-        const orderId = orderRows[0].id;
-        const subtotal = parseFloat(orderRows[0].subtotal);
-        const deliveryFee = parseFloat(orderRows[0].delivery_fee);
-        const [items]: any = await pool.query('SELECT product_id, product_name, price, quantity FROM order_items WHERE order_id = ?', [orderId]);
-        
-        let itemsHtml = '<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">';
+        // Fetch the order items to reduce stock and build email summary
+        const [orderRows]: any = await pool.query('SELECT id, subtotal, delivery_fee FROM orders WHERE stripe_session_id = ?', [sessionId]);
+        if (orderRows.length > 0) {
+          const orderId = orderRows[0].id;
+          const subtotal = parseFloat(orderRows[0].subtotal);
+          const deliveryFee = parseFloat(orderRows[0].delivery_fee);
+          const [items]: any = await pool.query('SELECT product_id, product_name, price, quantity FROM order_items WHERE order_id = ?', [orderId]);
+          
+          // Fetch dynamic email settings
+          const [settingsRows]: any = await pool.query('SELECT `key`, value FROM site_settings WHERE `key` LIKE "email_%" OR `key` = "admin_notification_email"');
+          const emailSettings: Record<string, string> = {};
+          settingsRows.forEach((row: any) => {
+            emailSettings[row.key] = row.value;
+          });
+
+          const primaryColor = emailSettings.email_primary_color || '#000000';
+          const accentColor = emailSettings.email_accent_color || '#f9f9f9';
+          
+          let itemsHtml = `<table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">`;
         for (const item of items) {
             let baseProductId = item.product_id;
             if (baseProductId.includes('-')) {
@@ -184,10 +240,10 @@ router.post('/webhook', async (req, res) => {
         }
         itemsHtml += `
                 <tr>
-                    <td style="padding: 10px 0; border-top: 2px solid #000000; text-align: right;">
+                    <td style="padding: 10px 0; border-top: 2px solid ${primaryColor}; text-align: right;">
                         <strong style="color: #666666; font-size: 14px;">Subtotal:</strong>
                     </td>
-                    <td style="padding: 10px 0; border-top: 2px solid #000000; text-align: right; color: #000000;">
+                    <td style="padding: 10px 0; border-top: 2px solid ${primaryColor}; text-align: right; color: ${primaryColor};">
                         £${subtotal.toFixed(2)}
                     </td>
                 </tr>
@@ -195,40 +251,71 @@ router.post('/webhook', async (req, res) => {
                     <td style="padding: 5px 0; text-align: right;">
                         <strong style="color: #666666; font-size: 14px;">Delivery Fee:</strong>
                     </td>
-                    <td style="padding: 5px 0; text-align: right; color: #000000;">
+                    <td style="padding: 5px 0; text-align: right; color: ${primaryColor};">
                         £${deliveryFee.toFixed(2)}
                     </td>
                 </tr>
             </table>
             
             <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eaeaea; font-size: 14px; color: #666666;">
-                <strong style="color: #000000;">Shipping Address:</strong><br/>
+                <strong style="color: ${primaryColor};">Shipping Address:</strong><br/>
                 ${shippingAddressStr}
             </div>
         `;
 
         // Send confirmation email to customer
         if (customerEmail && process.env.SMTP_USER) {
+          const subject = emailSettings.email_customer_subject || 'Order Confirmation - Asantey Hair & Beauty Salon';
+          const headerText = emailSettings.email_header_text || 'Asantey Hair & Beauty Salon';
+          const greetingText = (emailSettings.email_greeting || 'Dear {customerName},').replace('{customerName}', customerName || 'Customer');
+          
+          // format newlines to <br/>
+          const formatText = (text: string) => text ? text.replace(/\n/g, '<br/>') : '';
+          const bodyText = formatText(emailSettings.email_body_text || 'Thank you for choosing Asantey Hair & Beauty Salon. We are delighted to confirm that your order and payment have been successfully received.');
+          const footerText = formatText(emailSettings.email_footer_text || 'We will notify you as soon as your order ships. If you have any questions, please reply directly to this email.');
+          const closingText = formatText(emailSettings.email_closing_text || 'Warm regards,\nThe Asantey Hair & Beauty Salon Team');
+
+          const headerImg = emailSettings.email_header_image_url ? `
+            <div style="text-align: ${emailSettings.email_header_image_align || 'center'}; margin-bottom: 20px;">
+              <img src="${emailSettings.email_header_image_url}" alt="Header" style="max-width: ${emailSettings.email_header_image_width || '100%'}; height: auto;" />
+            </div>
+          ` : '';
+
+          const bodyImg = emailSettings.email_body_image_url ? `
+            <div style="text-align: ${emailSettings.email_body_image_align || 'center'}; margin: 20px 0;">
+              <img src="${emailSettings.email_body_image_url}" alt="Body" style="max-width: ${emailSettings.email_body_image_width || '100%'}; height: auto;" />
+            </div>
+          ` : '';
+
+          const footerImg = emailSettings.email_footer_image_url ? `
+            <div style="text-align: ${emailSettings.email_footer_image_align || 'center'}; margin-top: 30px;">
+              <img src="${emailSettings.email_footer_image_url}" alt="Footer" style="max-width: ${emailSettings.email_footer_image_width || '100%'}; height: auto;" />
+            </div>
+          ` : '';
+
           await transporter.sendMail({
             from: `"Asantey Hair & Beauty Salon" <${process.env.SMTP_USER}>`,
             to: customerEmail,
-            subject: 'Order Confirmation - Asantey Hair & Beauty Salon',
+            subject: subject,
             html: `
               <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border: 1px solid #eaeaea;">
+                  ${headerImg}
                   <div style="text-align: center; margin-bottom: 30px;">
-                      <h1 style="color: #000000; font-size: 24px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin: 0;">Asantey Hair &amp; Beauty Salon</h1>
-                      <div style="height: 1px; background-color: #000000; width: 50px; margin: 20px auto;"></div>
+                      <h1 style="color: ${primaryColor}; font-size: 24px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin: 0;">${headerText}</h1>
+                      <div style="height: 1px; background-color: ${primaryColor}; width: 50px; margin: 20px auto;"></div>
                   </div>
                   <div style="color: #333333; font-size: 14px; line-height: 1.6;">
-                      <p style="font-size: 16px; font-weight: 400; color: #000000;">Dear ${customerName},</p>
-                      <p>Thank you for choosing Asantey Hair &amp; Beauty Salon. We are delighted to confirm that your order and payment have been successfully received.</p>
-                      <div style="background-color: #f9f9f9; padding: 20px; margin: 30px 0; border-left: 3px solid #000000;">
+                      <p style="font-size: 16px; font-weight: 400; color: ${primaryColor};">${greetingText}</p>
+                      <p>${bodyText}</p>
+                      ${bodyImg}
+                      <div style="background-color: ${accentColor}; padding: 20px; margin: 30px 0; border-left: 3px solid ${primaryColor};">
                           <p style="margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #666666;">Order Summary</p>
                           ${itemsHtml}
-                          <p style="margin: 20px 0 0 0; font-size: 18px; color: #000000; text-align: right;"><strong>Total: £${(session.amount_total! / 100).toFixed(2)}</strong></p>
+                          <p style="margin: 20px 0 0 0; font-size: 18px; color: ${primaryColor}; text-align: right;"><strong>Total: £${(session.amount_total! / 100).toFixed(2)}</strong></p>
                       </div>
-                      <p>We will notify you as soon as your order ships. If you have any questions, please reply directly to this email.</p>
-                      <p style="margin-top: 40px; color: #666666;">Warm regards,<br/><strong style="color: #000000;">The Asantey Hair &amp; Beauty Salon Team</strong></p>
+                      <p>${footerText}</p>
+                      <p style="margin-top: 40px; color: #666666;">${closingText}</p>
+                      ${footerImg}
                   </div>
               </div>
             `
@@ -236,11 +323,7 @@ router.post('/webhook', async (req, res) => {
         }
 
         // Send notification to admin
-        const [settingsRows]: any = await pool.query('SELECT value FROM site_settings WHERE `key` = "admin_notification_email"');
-        let adminEmail = null;
-        if (settingsRows.length > 0 && settingsRows[0].value) {
-          adminEmail = settingsRows[0].value;
-        }
+        let adminEmail = emailSettings.admin_notification_email || null;
 
         if (adminEmail && process.env.SMTP_USER) {
           await transporter.sendMail({

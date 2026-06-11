@@ -64,14 +64,85 @@ export async function initDb() {
     } catch (alterErr) {
       console.log('services table column upgrade skipped or already updated');
     }
+
+    // Ensure products table has slug column
+    try {
+      await connection.query('ALTER TABLE products ADD COLUMN slug VARCHAR(255) UNIQUE NULL AFTER name');
+      console.log('products table slug column added');
+    } catch (alterErr: any) {
+      if (alterErr.code !== 'ER_DUP_FIELDNAME') {
+        console.log('products table slug column upgrade skipped or already updated', alterErr.message);
+      }
+    }
+
+    // Ensure services table has slug column
+    try {
+      await connection.query('ALTER TABLE services ADD COLUMN slug VARCHAR(255) UNIQUE NULL AFTER title');
+      console.log('services table slug column added');
+    } catch (alterErr: any) {
+      if (alterErr.code !== 'ER_DUP_FIELDNAME') {
+        console.log('services table slug column upgrade skipped or already updated', alterErr.message);
+      }
+    }
+
+    // Ensure product_variants table has texture column
+    try {
+      await connection.query('ALTER TABLE product_variants ADD COLUMN texture VARCHAR(100) NULL DEFAULT ""');
+      console.log('product_variants table texture column added');
+    } catch (alterErr: any) {
+      if (alterErr.code !== 'ER_DUP_FIELDNAME') {
+        console.log('product_variants table texture column upgrade skipped or already updated');
+      }
+    }
     
+    // Create hero_slides table if it doesn't exist
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS hero_slides (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          image_url MEDIUMTEXT NOT NULL,
+          headline VARCHAR(255),
+          subtitle TEXT,
+          button_1_text VARCHAR(100),
+          button_1_link VARCHAR(255),
+          button_2_text VARCHAR(100),
+          button_2_link VARCHAR(255),
+          is_active BOOLEAN DEFAULT 1,
+          display_order INT DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Create site_settings table if it doesn't exist
     await connection.query(`
       CREATE TABLE IF NOT EXISTS site_settings (
           id INT AUTO_INCREMENT PRIMARY KEY,
           \`key\` VARCHAR(255) NOT NULL UNIQUE,
-          \`value\` TEXT,
+          \`value\` MEDIUMTEXT,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create promo_codes table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS promo_codes (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          code VARCHAR(50) NOT NULL UNIQUE,
+          discount_percentage INT NOT NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          valid_until TIMESTAMP NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create promotions table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS promotions (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          title VARCHAR(255),
+          message TEXT NOT NULL,
+          end_time TIMESTAMP NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 
@@ -91,6 +162,50 @@ export async function initDb() {
       console.log('Seeded default site settings.');
     }
     
+    // Backfill slugs for products
+    const [productsWithoutSlugs]: any = await connection.query('SELECT id, name FROM products WHERE slug IS NULL');
+    for (const product of productsWithoutSlugs) {
+        const baseSlug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        let slug = baseSlug;
+        let counter = 1;
+        let success = false;
+        while (!success) {
+            try {
+                await connection.query('UPDATE products SET slug = ? WHERE id = ?', [slug, product.id]);
+                success = true;
+            } catch (err: any) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    slug = `${baseSlug}-${counter}`;
+                    counter++;
+                } else {
+                    throw err;
+                }
+            }
+        }
+    }
+
+    // Backfill slugs for services
+    const [servicesWithoutSlugs]: any = await connection.query('SELECT id, title FROM services WHERE slug IS NULL');
+    for (const service of servicesWithoutSlugs) {
+        const baseSlug = service.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        let slug = baseSlug;
+        let counter = 1;
+        let success = false;
+        while (!success) {
+            try {
+                await connection.query('UPDATE services SET slug = ? WHERE id = ?', [slug, service.id]);
+                success = true;
+            } catch (err: any) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    slug = `${baseSlug}-${counter}`;
+                    counter++;
+                } else {
+                    throw err;
+                }
+            }
+        }
+    }
+
     console.log('Database tables verified/initialized.');
     
     connection.release();
