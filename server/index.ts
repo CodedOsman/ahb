@@ -24,10 +24,12 @@ async function startServer() {
 
   app.use(cors());
 
-  // Webhook needs raw body, mount before express.json()
-  app.use("/api/checkout/webhook", express.raw({ type: 'application/json' }));
-
-  app.use(express.json({ limit: '50mb' }));
+  app.use(express.json({
+    limit: '50mb',
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf;
+    }
+  }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // API Routes
@@ -35,12 +37,10 @@ async function startServer() {
   app.use("/api", publicRoutes);
   app.use("/api/admin", adminRoutes);
 
-
-  // Serve static files from dist/public in production
-  const staticPath =
-    process.env.NODE_ENV === "production"
-      ? path.resolve(__dirname, "public")
-      : path.resolve(__dirname, "..", "dist", "public");
+  // Serve static files from environment variable or dist/public in production
+  const staticPath = process.env.PUBLIC_DIR
+    ? path.resolve(process.env.PUBLIC_DIR)
+    : path.resolve(process.cwd(), "dist", "public");
 
   // Redirect /cart to homepage (must be before static middleware)
   app.get('/cart', (_req, res) => {

@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Package, Truck, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface OrderItem {
+  id: number;
+  product_name: string;
+  price: string;
+  quantity: number;
+}
+
 interface Order {
   id: number;
   stripe_session_id: string;
@@ -14,6 +21,7 @@ interface Order {
   total: string;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   created_at: string;
+  items?: OrderItem[];
 }
 
 const OrdersPage: React.FC = () => {
@@ -84,6 +92,7 @@ const OrdersPage: React.FC = () => {
               <tr className="border-b border-silk-gray/10 bg-black/20">
                 <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Order ID</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Customer</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Items</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Shipping</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Total</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest text-warm-silver font-bold">Status</th>
@@ -102,6 +111,19 @@ const OrdersPage: React.FC = () => {
                     <td className="p-4">
                       <div className="text-sm text-onyx font-bold">{order.customer_name || 'N/A'}</div>
                       <div className="text-xs text-warm-silver">{order.customer_email || 'N/A'}</div>
+                    </td>
+                    <td className="p-4 min-w-[200px]">
+                      {order.items && order.items.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {order.items.map(item => (
+                            <div key={item.id} className="text-xs text-onyx whitespace-normal">
+                              <span className="font-bold">{item.quantity}x</span> {item.product_name}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-warm-silver italic">No items</div>
+                      )}
                     </td>
                     <td className="p-4">
                       <div className="text-xs text-warm-silver max-w-xs truncate" title={order.shipping_address}>

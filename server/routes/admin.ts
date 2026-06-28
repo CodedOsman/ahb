@@ -481,8 +481,17 @@ router.delete('/delivery-zones/:id', authenticateToken, async (req, res) => {
 // Manage Orders
 router.get('/orders', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT o.*, d.name as delivery_zone_name FROM orders o LEFT JOIN delivery_zones d ON o.delivery_zone_id = d.id ORDER BY o.created_at DESC');
-    res.json(rows);
+    const [orders]: any = await pool.query('SELECT o.*, d.name as delivery_zone_name FROM orders o LEFT JOIN delivery_zones d ON o.delivery_zone_id = d.id ORDER BY o.created_at DESC');
+    
+    if (orders.length > 0) {
+      const orderIds = orders.map((o: any) => o.id);
+      const [items]: any = await pool.query('SELECT * FROM order_items WHERE order_id IN (?)', [orderIds]);
+      orders.forEach((order: any) => {
+        order.items = items.filter((item: any) => item.order_id == order.id);
+      });
+    }
+
+    res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -491,9 +500,39 @@ router.get('/orders', authenticateToken, async (req, res) => {
 router.put('/orders/:id/status', authenticateToken, async (req, res) => {
   const { status } = req.body;
   try {
-    await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
+    const orderId = req.params.id;
+    await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+    
+    // If order is marked as shipped, send a notification email
+    if (status === 'shipped') {
+      const [orderRows]: any = await pool.query('SELECT * FROM orders WHERE id = ?', [orderId]);
+      const order = orderRows[0];
+      
+      if (order && order.customer_email && process.env.SMTP_USER) {
+        await transporter.sendMail({
+          from: `"Asantey Hair & Beauty Salon" <${process.env.SMTP_USER}>`,
+          to: order.customer_email,
+          subject: 'Your Order Has Been Shipped! - Asantey Hair & Beauty Salon',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px 20px; border: 1px solid #eaeaea;">
+              <h1 style="color: #000000; font-size: 24px; text-transform: uppercase;">Good News!</h1>
+              <p>Hi ${order.customer_name || 'there'},</p>
+              <p>Your order has been shipped and is on its way to you.</p>
+              <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 3px solid #000000;">
+                <p style="margin: 0;"><strong>Shipping Address:</strong><br/>${order.shipping_address || 'Not provided'}</p>
+              </div>
+              <p>We hope you love your purchase. If you have any questions, please feel free to reply directly to this email.</p>
+              <br/>
+              <p>Warm regards,<br/>The Asantey Hair & Beauty Salon Team</p>
+            </div>
+          `
+        }).catch(err => console.error("Failed to send shipping notification:", err));
+      }
+    }
+
     res.json({ message: 'Order status updated' });
   } catch (error) {
+    console.error('Error updating order status:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
