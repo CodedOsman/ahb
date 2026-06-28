@@ -17,13 +17,63 @@ const transporter = nodemailer.createTransport({
 
 const router = Router();
 
+const processImageUrl = (type: string, id: number, imageUrl: string | null) => {
+  if (!imageUrl) return imageUrl;
+  if (imageUrl.startsWith('data:image/')) {
+    return `/api/images/${type}/${id}`;
+  }
+  return imageUrl;
+};
+
+// Serve binary images from base64 strings
+router.get('/images/:type/:id', async (req, res) => {
+  const { type, id } = req.params;
+  let tableName = '';
+  if (type === 'service') tableName = 'services';
+  else if (type === 'product') tableName = 'products';
+  else if (type === 'hero-slide') tableName = 'hero_slides';
+  else if (type === 'client-photo') tableName = 'client_photos';
+  else if (type === 'category') tableName = 'categories';
+  else return res.status(400).json({ error: 'Invalid type' });
+
+  try {
+    const [rows]: any = await pool.query(`SELECT image_url FROM ${tableName} WHERE id = ?`, [id]);
+    if (rows.length === 0 || !rows[0].image_url) {
+      return res.status(404).send('Not found');
+    }
+    
+    const imageUrl = rows[0].image_url;
+    if (imageUrl.startsWith('data:image/')) {
+      const matches = imageUrl.match(/^data:(.+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        return res.status(500).send('Invalid image format');
+      }
+      const mimeType = matches[1];
+      const buffer = Buffer.from(matches[2], 'base64');
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // cache for 1 year
+      return res.send(buffer);
+    }
+    
+    // If it's a URL, redirect to it
+    res.redirect(imageUrl);
+  } catch (error) {
+    console.error('Error serving image:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 // Get hero slides
 router.get('/hero-slides', async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    const [rows]: any = await pool.query(
       'SELECT id, image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, display_order FROM hero_slides WHERE is_active = 1 ORDER BY display_order ASC, created_at DESC'
     );
-    res.json(rows);
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('hero-slide', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching hero slides:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -33,10 +83,14 @@ router.get('/hero-slides', async (req, res) => {
 // Get all services
 router.get('/services', async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    const [rows]: any = await pool.query(
       'SELECT id, category_id, title, description, price, image_url, booking_link, is_active FROM services WHERE is_active = 1'
     );
-    res.json(rows);
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('service', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching services:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -46,8 +100,12 @@ router.get('/services', async (req, res) => {
 // Get all categories
 router.get('/categories', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM categories');
-    res.json(rows);
+    const [rows]: any = await pool.query('SELECT * FROM categories');
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('category', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -71,8 +129,12 @@ router.get('/products', async (req, res) => {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    const [rows] = await pool.query(query, params);
-    res.json(rows);
+    const [rows]: any = await pool.query(query, params);
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('product', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -99,6 +161,7 @@ router.get('/products/:slug', async (req, res) => {
     );
     res.json({
       ...productRows[0],
+      image_url: processImageUrl('product', productId, productRows[0].image_url),
       variants: variantRows,
     });
   } catch (error) {
@@ -133,8 +196,12 @@ router.get('/delivery-zones', async (req, res) => {
 // Get client photos
 router.get('/client-photos', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM client_photos ORDER BY created_at DESC');
-    res.json(rows);
+    const [rows]: any = await pool.query('SELECT * FROM client_photos ORDER BY created_at DESC');
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('client-photo', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching client photos:', error);
     res.status(500).json({ error: 'Internal server error' });

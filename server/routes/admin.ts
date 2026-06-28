@@ -19,6 +19,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const processImageUrl = (type: string, id: number, imageUrl: string | null) => {
+  if (!imageUrl) return imageUrl;
+  if (imageUrl.startsWith('data:image/')) {
+    return `/api/images/${type}/${id}`;
+  }
+  return imageUrl;
+};
+
 // Middleware to verify JWT
 export const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
@@ -149,8 +157,12 @@ router.put('/profile', authenticateToken, async (req: any, res) => {
 // Manage Categories
 router.get('/categories', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM categories ORDER BY created_at DESC');
-    res.json(rows);
+    const [rows]: any = await pool.query('SELECT * FROM categories ORDER BY created_at DESC');
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('category', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -201,14 +213,18 @@ router.delete('/categories/:id', authenticateToken, async (req, res) => {
 // Manage Services
 router.get('/services', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query(`
+    const [rows]: any = await pool.query(`
       SELECT s.id, s.category_id, s.title, s.description, s.price, s.image_url, s.booking_link, s.is_active,
              c.name as category_name
       FROM services s
       LEFT JOIN categories c ON s.category_id = c.id
       ORDER BY s.created_at DESC
     `);
-    res.json(rows);
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('service', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -429,6 +445,7 @@ router.get('/products', authenticateToken, async (req, res) => {
         ...p,
         stock: productVariants.length ? variantStock : p.stock,
         variants: productVariants,
+        image_url: processImageUrl('product', p.id, p.image_url)
       };
     });
 
@@ -585,8 +602,12 @@ router.post('/settings', authenticateToken, async (req, res) => {
 // Manage Client Photos
 router.get('/client-photos', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM client_photos ORDER BY created_at DESC');
-    res.json(rows);
+    const [rows]: any = await pool.query('SELECT * FROM client_photos ORDER BY created_at DESC');
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('client-photo', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error getting admin client photos:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -653,8 +674,12 @@ router.delete('/reviews/:id', authenticateToken, async (req, res) => {
 
 router.get('/hero-slides', authenticateToken, async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM hero_slides ORDER BY display_order ASC, created_at DESC');
-    res.json(rows);
+    const [rows]: any = await pool.query('SELECT * FROM hero_slides ORDER BY display_order ASC, created_at DESC');
+    const processedRows = rows.map((row: any) => ({
+      ...row,
+      image_url: processImageUrl('hero-slide', row.id, row.image_url)
+    }));
+    res.json(processedRows);
   } catch (error) {
     console.error('Error fetching admin hero slides:', error);
     res.status(500).json({ error: 'Internal server error' });
