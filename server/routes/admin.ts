@@ -5,6 +5,12 @@ import pool from '../db';
 import { logError } from '../utils/logger';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'asantey_luxury_salon_secret_key_2024';
@@ -19,12 +25,35 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const processImageUrl = (type: string, id: number, imageUrl: string | null) => {
-  if (!imageUrl) return imageUrl;
-  if (imageUrl.startsWith('data:image/')) {
-    return `/api/images/${type}/${id}`;
+
+const UPLOADS_DIR = process.env.PUBLIC_DIR 
+  ? path.join(process.env.PUBLIC_DIR, 'uploads')
+  : path.join(__dirname, '../../client/public/uploads');
+
+const saveBase64Image = (type: string, base64String: string | null | undefined): string | null => {
+  if (!base64String || !base64String.startsWith('data:image/')) {
+    return base64String || null;
   }
-  return imageUrl;
+
+  const matches = base64String.match(/^data:image\/(.+);base64,(.+)$/);
+  if (!matches || matches.length !== 3) {
+    return base64String;
+  }
+
+  const extension = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  const data = matches[2];
+  const buffer = Buffer.from(data, 'base64');
+  const filename = `${Date.now()}-${Math.floor(Math.random() * 10000)}.${extension}`;
+  const typeDir = path.join(UPLOADS_DIR, type);
+
+  if (!fs.existsSync(typeDir)) {
+    fs.mkdirSync(typeDir, { recursive: true });
+  }
+
+  const filePath = path.join(typeDir, filename);
+  fs.writeFileSync(filePath, buffer);
+
+  return `/uploads/${type}/${filename}`;
 };
 
 // Middleware to verify JWT
@@ -158,11 +187,7 @@ router.put('/profile', authenticateToken, async (req: any, res) => {
 router.get('/categories', authenticateToken, async (req, res) => {
   try {
     const [rows]: any = await pool.query('SELECT * FROM categories ORDER BY created_at DESC');
-    const processedRows = rows.map((row: any) => ({
-      ...row,
-      image_url: processImageUrl('category', row.id, row.image_url)
-    }));
-    res.json(processedRows);
+    res.json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -170,10 +195,11 @@ router.get('/categories', authenticateToken, async (req, res) => {
 
 router.post('/categories', authenticateToken, async (req, res) => {
   const { name, slug, type, image_url } = req.body;
+  const finalImageUrl = saveBase64Image('category', image_url);
   try {
     const [result]: any = await pool.query(
       'INSERT INTO categories (name, slug, type, image_url) VALUES (?, ?, ?, ?)',
-      [name, slug, type, image_url || null]
+      [name, slug, type, finalImageUrl || null]
     );
     res.json({ id: result.insertId, message: 'Category created' });
   } catch (error: any) {
@@ -186,11 +212,12 @@ router.post('/categories', authenticateToken, async (req, res) => {
 
 router.put('/categories/:id', authenticateToken, async (req, res) => {
   const { name, slug, type, image_url } = req.body;
+  const finalImageUrl = saveBase64Image('category', image_url);
   console.log(`[PUT /categories/${req.params.id}] name: ${name}, image_url length: ${image_url?.length || 0}`);
   try {
     await pool.query(
       'UPDATE categories SET name = ?, slug = ?, type = ?, image_url = ? WHERE id = ?',
-      [name, slug, type, image_url || null, req.params.id]
+      [name, slug, type, finalImageUrl || null, req.params.id]
     );
     res.json({ message: 'Category updated' });
   } catch (error: any) {
@@ -220,11 +247,7 @@ router.get('/services', authenticateToken, async (req, res) => {
       LEFT JOIN categories c ON s.category_id = c.id
       ORDER BY s.created_at DESC
     `);
-    const processedRows = rows.map((row: any) => ({
-      ...row,
-      image_url: processImageUrl('service', row.id, row.image_url)
-    }));
-    res.json(processedRows);
+    res.json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -232,6 +255,7 @@ router.get('/services', authenticateToken, async (req, res) => {
 
 router.post('/services', authenticateToken, async (req, res) => {
   const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  const finalImageUrl = saveBase64Image('service', image_url);
   const connection = await pool.getConnection();
   try {
     const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -244,7 +268,7 @@ router.post('/services', authenticateToken, async (req, res) => {
       try {
         const [result]: any = await connection.query(
           'INSERT INTO services (category_id, title, slug, description, price, image_url, booking_link, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [category_id, title, slug, description, price, image_url, booking_link || null, is_active === undefined ? 1 : is_active]
+          [category_id, title, slug, description, price, finalImageUrl, booking_link || null, is_active === undefined ? 1 : is_active]
         );
         insertId = result.insertId;
         success = true;
@@ -269,6 +293,7 @@ router.post('/services', authenticateToken, async (req, res) => {
 
 router.put('/services/:id', authenticateToken, async (req, res) => {
   const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  const finalImageUrl = saveBase64Image('service', image_url);
   const connection = await pool.getConnection();
   try {
     const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -280,7 +305,7 @@ router.put('/services/:id', authenticateToken, async (req, res) => {
       try {
         await connection.query(
           'UPDATE services SET category_id = ?, title = ?, slug = ?, description = ?, price = ?, image_url = ?, booking_link = ?, is_active = ? WHERE id = ?',
-          [category_id, title, slug, description, price, image_url, booking_link || null, is_active, req.params.id]
+          [category_id, title, slug, description, price, finalImageUrl, booking_link || null, is_active, req.params.id]
         );
         success = true;
       } catch (err: any) {
@@ -313,6 +338,7 @@ router.delete('/services/:id', authenticateToken, async (req, res) => {
 // Manage Products
 router.post('/products', authenticateToken, async (req, res) => {
   const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  const finalImageUrl = saveBase64Image('product', image_url);
   const totalStock = Array.isArray(variants) && variants.length
     ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
     : (stock || 0);
@@ -330,7 +356,7 @@ router.post('/products', authenticateToken, async (req, res) => {
         try {
             const [result]: any = await connection.query(
               'INSERT INTO products (category_id, name, slug, description, base_price, image_url, is_active, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-              [category_id, name, slug, description, base_price, image_url, is_active === undefined ? 1 : is_active, totalStock]
+              [category_id, name, slug, description, base_price, finalImageUrl, is_active === undefined ? 1 : is_active, totalStock]
             );
             productId = result.insertId;
             success = true;
@@ -371,6 +397,7 @@ router.post('/products', authenticateToken, async (req, res) => {
 
 router.put('/products/:id', authenticateToken, async (req, res) => {
   const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  const finalImageUrl = saveBase64Image('product', image_url);
   const totalStock = Array.isArray(variants) && variants.length
     ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
     : (stock || 0);
@@ -387,7 +414,7 @@ router.put('/products/:id', authenticateToken, async (req, res) => {
         try {
             await connection.query(
               'UPDATE products SET category_id = ?, name = ?, slug = ?, description = ?, base_price = ?, image_url = ?, is_active = ?, stock = ? WHERE id = ?',
-              [category_id, name, slug, description, base_price, image_url, is_active, totalStock, req.params.id]
+              [category_id, name, slug, description, base_price, finalImageUrl, is_active, totalStock, req.params.id]
             );
             success = true;
         } catch (err: any) {
@@ -444,8 +471,7 @@ router.get('/products', authenticateToken, async (req, res) => {
       return {
         ...p,
         stock: productVariants.length ? variantStock : p.stock,
-        variants: productVariants,
-        image_url: processImageUrl('product', p.id, p.image_url)
+        variants: productVariants
       };
     });
 
@@ -581,7 +607,10 @@ router.post('/settings', authenticateToken, async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    for (const [key, value] of Object.entries(settings)) {
+    for (let [key, value] of Object.entries(settings)) {
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        value = saveBase64Image('setting', value) || value;
+      }
       await connection.query(
         'INSERT INTO site_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
         [key, value, value]
@@ -603,11 +632,7 @@ router.post('/settings', authenticateToken, async (req, res) => {
 router.get('/client-photos', authenticateToken, async (req, res) => {
   try {
     const [rows]: any = await pool.query('SELECT * FROM client_photos ORDER BY created_at DESC');
-    const processedRows = rows.map((row: any) => ({
-      ...row,
-      image_url: processImageUrl('client-photo', row.id, row.image_url)
-    }));
-    res.json(processedRows);
+    res.json(rows);
   } catch (error) {
     console.error('Error getting admin client photos:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -616,13 +641,14 @@ router.get('/client-photos', authenticateToken, async (req, res) => {
 
 router.post('/client-photos', authenticateToken, async (req, res) => {
   const { image_url, caption } = req.body;
-  if (!image_url) {
+  const finalImageUrl = saveBase64Image('client-photo', image_url);
+  if (!finalImageUrl) {
     return res.status(400).json({ error: 'Image URL is required' });
   }
   try {
     const [result]: any = await pool.query(
       'INSERT INTO client_photos (image_url, caption) VALUES (?, ?)',
-      [image_url, caption || '']
+      [finalImageUrl, caption || '']
     );
     res.json({ id: result.insertId, image_url, caption, message: 'Client photo added' });
   } catch (error) {
@@ -675,11 +701,7 @@ router.delete('/reviews/:id', authenticateToken, async (req, res) => {
 router.get('/hero-slides', authenticateToken, async (req, res) => {
   try {
     const [rows]: any = await pool.query('SELECT * FROM hero_slides ORDER BY display_order ASC, created_at DESC');
-    const processedRows = rows.map((row: any) => ({
-      ...row,
-      image_url: processImageUrl('hero-slide', row.id, row.image_url)
-    }));
-    res.json(processedRows);
+    res.json(rows);
   } catch (error) {
     console.error('Error fetching admin hero slides:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -688,13 +710,14 @@ router.get('/hero-slides', authenticateToken, async (req, res) => {
 
 router.post('/hero-slides', authenticateToken, async (req, res) => {
   const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
-  if (!image_url) {
+  const finalImageUrl = saveBase64Image('hero-slide', image_url);
+  if (!finalImageUrl) {
     return res.status(400).json({ error: 'Image URL is required' });
   }
   try {
     await pool.query(
       'INSERT INTO hero_slides (image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [image_url, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active !== undefined ? is_active : 1, display_order || 0]
+      [finalImageUrl, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active !== undefined ? is_active : 1, display_order || 0]
     );
     res.json({ message: 'Hero slide created successfully' });
   } catch (error) {
@@ -705,10 +728,11 @@ router.post('/hero-slides', authenticateToken, async (req, res) => {
 
 router.put('/hero-slides/:id', authenticateToken, async (req, res) => {
   const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  const finalImageUrl = saveBase64Image('hero-slide', image_url);
   try {
     await pool.query(
       'UPDATE hero_slides SET image_url = ?, headline = ?, subtitle = ?, button_1_text = ?, button_1_link = ?, button_2_text = ?, button_2_link = ?, is_active = ?, display_order = ? WHERE id = ?',
-      [image_url, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active, display_order, req.params.id]
+      [finalImageUrl, headline || null, subtitle || null, button_1_text || null, button_1_link || null, button_2_text || null, button_2_link || null, is_active, display_order, req.params.id]
     );
     res.json({ message: 'Hero slide updated successfully' });
   } catch (error) {
