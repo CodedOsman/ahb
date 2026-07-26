@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { convertToWebp } from '../utils/imageProcessor';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -194,7 +195,8 @@ router.get('/categories', authenticateToken, async (req, res) => {
 });
 
 router.post('/categories', authenticateToken, async (req, res) => {
-  const { name, slug, type, image_url } = req.body;
+  let { name, slug, type, image_url } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('category', image_url);
   try {
     const [result]: any = await pool.query(
@@ -211,7 +213,8 @@ router.post('/categories', authenticateToken, async (req, res) => {
 });
 
 router.put('/categories/:id', authenticateToken, async (req, res) => {
-  const { name, slug, type, image_url } = req.body;
+  let { name, slug, type, image_url } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('category', image_url);
   console.log(`[PUT /categories/${req.params.id}] name: ${name}, image_url length: ${image_url?.length || 0}`);
   try {
@@ -254,7 +257,8 @@ router.get('/services', authenticateToken, async (req, res) => {
 });
 
 router.post('/services', authenticateToken, async (req, res) => {
-  const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  let { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('service', image_url);
   const connection = await pool.getConnection();
   try {
@@ -292,7 +296,8 @@ router.post('/services', authenticateToken, async (req, res) => {
 
 
 router.put('/services/:id', authenticateToken, async (req, res) => {
-  const { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  let { category_id, title, description, price, image_url, booking_link, is_active } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('service', image_url);
   const connection = await pool.getConnection();
   try {
@@ -337,7 +342,8 @@ router.delete('/services/:id', authenticateToken, async (req, res) => {
 
 // Manage Products
 router.post('/products', authenticateToken, async (req, res) => {
-  const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  let { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('product', image_url);
   const totalStock = Array.isArray(variants) && variants.length
     ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
@@ -396,7 +402,8 @@ router.post('/products', authenticateToken, async (req, res) => {
 });
 
 router.put('/products/:id', authenticateToken, async (req, res) => {
-  const { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  let { category_id, name, description, base_price, image_url, is_active, variants, stock } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('product', image_url);
   const totalStock = Array.isArray(variants) && variants.length
     ? variants.reduce((sum: number, v: any) => sum + (Number(v.stock) || 0), 0)
@@ -640,7 +647,8 @@ router.get('/client-photos', authenticateToken, async (req, res) => {
 });
 
 router.post('/client-photos', authenticateToken, async (req, res) => {
-  const { image_url, caption } = req.body;
+  let { image_url, caption } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('client-photo', image_url);
   if (!finalImageUrl) {
     return res.status(400).json({ error: 'Image URL is required' });
@@ -709,7 +717,8 @@ router.get('/hero-slides', authenticateToken, async (req, res) => {
 });
 
 router.post('/hero-slides', authenticateToken, async (req, res) => {
-  const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  let { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('hero-slide', image_url);
   if (!finalImageUrl) {
     return res.status(400).json({ error: 'Image URL is required' });
@@ -727,7 +736,8 @@ router.post('/hero-slides', authenticateToken, async (req, res) => {
 });
 
 router.put('/hero-slides/:id', authenticateToken, async (req, res) => {
-  const { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  let { image_url, headline, subtitle, button_1_text, button_1_link, button_2_text, button_2_link, is_active, display_order } = req.body;
+  image_url = await convertToWebp(image_url);
   const finalImageUrl = saveBase64Image('hero-slide', image_url);
   try {
     await pool.query(
